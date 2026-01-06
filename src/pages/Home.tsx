@@ -92,7 +92,7 @@ export default function Home() {
         }
       />
 
-      <main className="pb-24">
+      <main className="pb-24 overflow-y-auto scrollbar-thin" style={{ maxHeight: 'calc(100vh - 64px)' }}>
         {searchQuery && filteredChats.length === 0 ? (
           <EmptyState type="search" />
         ) : filteredChats.length === 0 ? (
