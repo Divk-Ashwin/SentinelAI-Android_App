@@ -40,7 +40,11 @@ export default function ChatView() {
   const [menuOpen, setMenuOpen] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const unreadDividerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [initialScrollDone, setInitialScrollDone] = useState(false);
+  const [previousMessageCount, setPreviousMessageCount] = useState(0);
 
   const chat = getChatById(chatId || '');
 
@@ -50,9 +54,32 @@ export default function ChatView() {
     }
   }, [chatId, markAsRead]);
 
+  // Find first unread message index
+  const firstUnreadIndex = chat?.messages.findIndex(m => !m.isRead && m.sender === 'contact') ?? -1;
+  const hasUnreadMessages = firstUnreadIndex !== -1;
+
+  // Initial scroll to unread divider or bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chat?.messages]);
+    if (!initialScrollDone && chat?.messages) {
+      if (hasUnreadMessages && unreadDividerRef.current) {
+        unreadDividerRef.current.scrollIntoView({ behavior: 'instant', block: 'start' });
+      } else {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
+      }
+      setInitialScrollDone(true);
+      setPreviousMessageCount(chat.messages.length);
+    }
+  }, [chat?.messages, hasUnreadMessages, initialScrollDone]);
+
+  // Auto-scroll only when new message is sent (message count increases)
+  useEffect(() => {
+    if (chat?.messages && initialScrollDone) {
+      if (chat.messages.length > previousMessageCount) {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }
+      setPreviousMessageCount(chat.messages.length);
+    }
+  }, [chat?.messages?.length, initialScrollDone, previousMessageCount]);
 
   if (!chat) {
     return (
@@ -195,7 +222,7 @@ export default function ChatView() {
       )}
 
       {/* Messages */}
-      <main className="flex-1 overflow-y-auto px-4 py-4">
+      <main ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-4 scrollbar-thin">
         {Object.entries(groupedMessages).map(([date, messages]) => (
           <div key={date}>
             <div className="flex justify-center my-4">
@@ -203,15 +230,28 @@ export default function ChatView() {
                 {formatDateSeparator(date)}
               </span>
             </div>
-            {messages.map((message) => (
-              <MessageBubble
-                key={message.id}
-                message={message}
-                onStar={() => starMessage(chat.id, message.id)}
-                onDelete={() => deleteMessage(chat.id, message.id)}
-                onAnalyze={() => handleAnalyze(message.text)}
-              />
-            ))}
+            {messages.map((message, index) => {
+              const globalIndex = chat.messages.findIndex(m => m.id === message.id);
+              const showUnreadDivider = globalIndex === firstUnreadIndex;
+              
+              return (
+                <div key={message.id}>
+                  {showUnreadDivider && (
+                    <div ref={unreadDividerRef} className="flex items-center gap-3 my-4">
+                      <div className="flex-1 h-px bg-primary/50" />
+                      <span className="text-xs font-medium text-primary">Unread messages</span>
+                      <div className="flex-1 h-px bg-primary/50" />
+                    </div>
+                  )}
+                  <MessageBubble
+                    message={message}
+                    onStar={() => starMessage(chat.id, message.id)}
+                    onDelete={() => deleteMessage(chat.id, message.id)}
+                    onAnalyze={() => handleAnalyze(message.text)}
+                  />
+                </div>
+              );
+            })}
           </div>
         ))}
         <div ref={messagesEndRef} />
