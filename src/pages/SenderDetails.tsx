@@ -20,7 +20,7 @@ import { useState } from 'react';
 export default function SenderDetails() {
   const { chatId } = useParams<{ chatId: string }>();
   const navigate = useNavigate();
-  const { getChatById, deleteChat } = useChat();
+  const { getChatById, blockContact } = useChat();
   const { toast } = useToast();
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
 
@@ -38,12 +38,16 @@ export default function SenderDetails() {
   const secondaryInfo = chat.contactName ? chat.contactPhone : 'Not in contacts';
 
   const handleBlock = () => {
-    deleteChat(chat.id);
+    blockContact(chat.id);
     toast({
       title: "Contact blocked",
       description: "You will no longer receive messages from this contact.",
     });
     navigate('/');
+  };
+
+  const handleSearchInConversation = () => {
+    navigate(`/chat/${chat.id}?openSearch=true`);
   };
 
   return (
@@ -72,7 +76,7 @@ export default function SenderDetails() {
           <Button
             variant="outline"
             className="w-full justify-start gap-3 h-12"
-            onClick={() => toast({ title: "Coming soon", description: "Search in conversation will be available soon." })}
+            onClick={handleSearchInConversation}
           >
             <Search className="w-5 h-5" />
             Search in conversation

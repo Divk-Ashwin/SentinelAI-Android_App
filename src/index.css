@@ -163,8 +163,85 @@ All colors MUST be HSL.
   }
 }
 
-/* Custom scrollbar */
+/* Spotify-style auto-hiding scrollbar */
 @layer utilities {
+  .scrollbar-spotify {
+    --scrollbar-opacity: 0;
+    transition: --scrollbar-opacity 0.2s ease;
+  }
+
+  .scrollbar-spotify::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollbar-spotify::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-spotify::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted) / 0.25);
+    border-radius: 4px;
+    transition: background 0.2s ease;
+  }
+
+  .scrollbar-spotify:hover::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted) / 0.5);
+  }
+
+  .scrollbar-spotify::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted) / 0.6);
+  }
+
+  /* Firefox */
+  .scrollbar-spotify {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted) / 0.25) transparent;
+  }
+
+  .scrollbar-spotify:hover {
+    scrollbar-color: hsl(var(--muted) / 0.5) transparent;
+  }
+
+  /* Auto-hide scrollbar wrapper */
+  .scrollbar-autohide {
+    --scrollbar-opacity: 0;
+  }
+
+  .scrollbar-autohide::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollbar-autohide::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-autohide::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted) / var(--scrollbar-opacity, 0.25));
+    border-radius: 4px;
+    transition: background 0.2s ease;
+  }
+
+  .scrollbar-autohide:hover::-webkit-scrollbar-thumb,
+  .scrollbar-autohide.scrolling::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted) / 0.5);
+  }
+
+  .scrollbar-autohide::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted) / 0.6);
+  }
+
+  /* Firefox */
+  .scrollbar-autohide {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .scrollbar-autohide:hover,
+  .scrollbar-autohide.scrolling {
+    scrollbar-color: hsl(var(--muted) / 0.5) transparent;
+  }
+
+  /* Legacy scrollbar-thin for backwards compatibility */
   .scrollbar-thin::-webkit-scrollbar {
     width: 3px;
   }
@@ -209,4 +286,13 @@ All colors MUST be HSL.
 
 .slide-in-from-bottom-8 {
   animation-name: slide-in-from-bottom-8;
+}
+
+/* Theme transition */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.transitioning * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
 }

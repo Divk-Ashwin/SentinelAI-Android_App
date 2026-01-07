@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/chat/Header';
 import { MessageBubble } from '@/components/chat/MessageBubble';
 import { AnalyzeModal } from '@/components/chat/AnalyzeModal';
+import { SearchMessagesModal } from '@/components/chat/SearchMessagesModal';
 import { useChat } from '@/context/ChatContext';
 import { useToast } from '@/hooks/use-toast';
 import { Send, Paperclip, AlertTriangle, X, Star, Search, Archive, Trash2, ShieldOff, UserPlus, Info } from 'lucide-react';
@@ -27,17 +28,21 @@ import { MoreVertical } from 'lucide-react';
 
 export default function ChatView() {
   const { chatId } = useParams<{ chatId: string }>();
+  const [searchParams] = useSearchParams();
+  const highlightMessageId = searchParams.get('highlight');
   const navigate = useNavigate();
-  const { getChatById, sendMessage, deleteChat, archiveChat, starMessage, deleteMessage, markAsRead } = useChat();
+  const { getChatById, sendMessage, deleteChat, archiveChat, starMessage, deleteMessage, markAsRead, blockContact } = useChat();
   const { toast } = useToast();
   
   const [inputValue, setInputValue] = useState('');
   const [showWarning, setShowWarning] = useState(true);
   const [analyzeModalOpen, setAnalyzeModalOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [selectedMessageText, setSelectedMessageText] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -45,6 +50,8 @@ export default function ChatView() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [initialScrollDone, setInitialScrollDone] = useState(false);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const chat = getChatById(chatId || '');
 
@@ -53,6 +60,24 @@ export default function ChatView() {
       markAsRead(chatId);
     }
   }, [chatId, markAsRead]);
+
+  // Handle highlight from URL param
+  useEffect(() => {
+    if (highlightMessageId && chat?.messages) {
+      setHighlightedMessageId(highlightMessageId);
+      // Scroll to the highlighted message
+      setTimeout(() => {
+        const messageElement = messageRefs.current[highlightMessageId];
+        if (messageElement) {
+          messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+      // Clear highlight after 2 seconds
+      setTimeout(() => {
+        setHighlightedMessageId(null);
+      }, 2000);
+    }
+  }, [highlightMessageId, chat?.messages]);
 
   // Find first unread message index
   const firstUnreadIndex = chat?.messages.findIndex(m => !m.isRead && m.sender === 'contact') ?? -1;
@@ -80,6 +105,35 @@ export default function ChatView() {
       setPreviousMessageCount(chat.messages.length);
     }
   }, [chat?.messages?.length, initialScrollDone, previousMessageCount]);
+
+  // Handle scroll for auto-hide scrollbar
+  const handleScroll = useCallback(() => {
+    const element = messagesContainerRef.current;
+    if (!element) return;
+
+    element.classList.add('scrolling');
+
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+
+    scrollTimeoutRef.current = setTimeout(() => {
+      element.classList.remove('scrolling');
+    }, 1500);
+  }, []);
+
+  useEffect(() => {
+    const element = messagesContainerRef.current;
+    if (!element) return;
+
+    element.addEventListener('scroll', handleScroll);
+    return () => {
+      element.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [handleScroll]);
 
   if (!chat) {
     return (
@@ -129,12 +183,28 @@ export default function ChatView() {
   };
 
   const handleBlock = () => {
-    deleteChat(chat.id);
+    blockContact(chat.id);
     toast({
       title: "Contact blocked",
       description: "You will no longer receive messages from this contact.",
     });
     navigate('/');
+  };
+
+  const handleNavigateToMessage = (messageId: string) => {
+    setSearchModalOpen(false);
+    setHighlightedMessageId(messageId);
+    
+    setTimeout(() => {
+      const messageElement = messageRefs.current[messageId];
+      if (messageElement) {
+        messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+
+    setTimeout(() => {
+      setHighlightedMessageId(null);
+    }, 2000);
   };
 
   // Group messages by date
@@ -171,7 +241,7 @@ export default function ChatView() {
                 <MoreVertical className="w-5 h-5 text-foreground" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-56 max-h-[70vh] overflow-y-auto scrollbar-spotify">
               <DropdownMenuItem onClick={() => { toast({ title: "Coming soon", description: "Add to contacts will be available soon." }); setMenuOpen(false); }} className="gap-3">
                 <UserPlus className="w-4 h-4" />
                 Add to contacts
@@ -184,7 +254,7 @@ export default function ChatView() {
                 <Star className="w-4 h-4" />
                 Star conversation
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { toast({ title: "Coming soon", description: "Search in chat will be available soon." }); setMenuOpen(false); }} className="gap-3">
+              <DropdownMenuItem onClick={() => { setSearchModalOpen(true); setMenuOpen(false); }} className="gap-3">
                 <Search className="w-4 h-4" />
                 Search in chat
               </DropdownMenuItem>
@@ -222,7 +292,7 @@ export default function ChatView() {
       )}
 
       {/* Messages */}
-      <main ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-4 scrollbar-thin">
+      <main ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-4 scrollbar-autohide">
         {Object.entries(groupedMessages).map(([date, messages]) => (
           <div key={date}>
             <div className="flex justify-center my-4">
@@ -235,7 +305,10 @@ export default function ChatView() {
               const showUnreadDivider = globalIndex === firstUnreadIndex;
               
               return (
-                <div key={message.id}>
+                <div 
+                  key={message.id}
+                  ref={(el) => { messageRefs.current[message.id] = el; }}
+                >
                   {showUnreadDivider && (
                     <div ref={unreadDividerRef} className="flex items-center gap-3 my-4">
                       <div className="flex-1 h-px bg-primary/50" />
@@ -248,6 +321,7 @@ export default function ChatView() {
                     onStar={() => starMessage(chat.id, message.id)}
                     onDelete={() => deleteMessage(chat.id, message.id)}
                     onAnalyze={() => handleAnalyze(message.text)}
+                    isHighlighted={highlightedMessageId === message.id}
                   />
                 </div>
               );
@@ -297,6 +371,15 @@ export default function ChatView() {
         isOpen={analyzeModalOpen}
         onClose={() => setAnalyzeModalOpen(false)}
         messageText={selectedMessageText}
+      />
+
+      {/* Search Messages Modal */}
+      <SearchMessagesModal
+        isOpen={searchModalOpen}
+        onClose={() => setSearchModalOpen(false)}
+        messages={chat.messages}
+        onNavigateToMessage={handleNavigateToMessage}
+        contactName={displayName}
       />
 
       {/* Delete Dialog */}

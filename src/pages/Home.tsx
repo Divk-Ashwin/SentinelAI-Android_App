@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/chat/Header';
 import { ChatListItem } from '@/components/chat/ChatListItem';
@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreVertical, CheckCheck, Trash2, Settings, Archive, ShieldOff } from 'lucide-react';
+import { MoreVertical, CheckCheck, Trash2, Settings, Archive, ShieldOff, Star } from 'lucide-react';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -21,6 +21,8 @@ export default function Home() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const filteredChats = chats.filter(chat => {
     const searchLower = searchQuery.toLowerCase();
@@ -48,8 +50,37 @@ export default function Home() {
     setMenuOpen(false);
   };
 
+  // Handle scroll for auto-hide scrollbar
+  const handleScroll = useCallback(() => {
+    const element = scrollRef.current;
+    if (!element) return;
+
+    element.classList.add('scrolling');
+
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+
+    scrollTimeoutRef.current = setTimeout(() => {
+      element.classList.remove('scrolling');
+    }, 1500);
+  }, []);
+
+  useEffect(() => {
+    const element = scrollRef.current;
+    if (!element) return;
+
+    element.addEventListener('scroll', handleScroll);
+    return () => {
+      element.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [handleScroll]);
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
       <Header
         title="SecureChat"
         showSearch
@@ -66,7 +97,7 @@ export default function Home() {
                 <MoreVertical className="w-5 h-5 text-foreground" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-56 max-h-[70vh] overflow-y-auto scrollbar-spotify">
               <DropdownMenuItem onClick={handleMarkAllAsRead} className="gap-3">
                 <CheckCheck className="w-4 h-4" />
                 Mark all as read
@@ -74,6 +105,10 @@ export default function Home() {
               <DropdownMenuItem onClick={handleDeleteAll} className="gap-3 text-destructive focus:text-destructive">
                 <Trash2 className="w-4 h-4" />
                 Delete all conversations
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { navigate('/starred'); setMenuOpen(false); }} className="gap-3">
+                <Star className="w-4 h-4" />
+                Starred messages
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => { navigate('/settings'); setMenuOpen(false); }} className="gap-3">
                 <Settings className="w-4 h-4" />
@@ -83,7 +118,7 @@ export default function Home() {
                 <Archive className="w-4 h-4" />
                 Archived messages
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { toast({ title: "Coming soon", description: "Spam & blocked settings will be available in a future update." }); setMenuOpen(false); }} className="gap-3">
+              <DropdownMenuItem onClick={() => { navigate('/blocked'); setMenuOpen(false); }} className="gap-3">
                 <ShieldOff className="w-4 h-4" />
                 Spam & blocked
               </DropdownMenuItem>
@@ -92,7 +127,11 @@ export default function Home() {
         }
       />
 
-      <main className="pb-24 overflow-y-auto scrollbar-thin" style={{ maxHeight: 'calc(100vh - 64px)' }}>
+      <main 
+        ref={scrollRef}
+        className="pb-24 overflow-y-auto scrollbar-autohide" 
+        style={{ maxHeight: 'calc(100vh - 64px)' }}
+      >
         {searchQuery && filteredChats.length === 0 ? (
           <EmptyState type="search" />
         ) : filteredChats.length === 0 ? (
