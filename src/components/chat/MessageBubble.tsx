@@ -1,6 +1,6 @@
 import { Message } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
-import { Star, Copy, Trash2, Brain } from 'lucide-react';
+import { Star, Copy, Trash2, Brain, Check, CheckCheck } from 'lucide-react';
 import { useState } from 'react';
 import {
   ContextMenu,
@@ -15,17 +15,32 @@ interface MessageBubbleProps {
   onStar: () => void;
   onDelete: () => void;
   onAnalyze: () => void;
+  isHighlighted?: boolean;
 }
 
-export function MessageBubble({ message, onStar, onDelete, onAnalyze }: MessageBubbleProps) {
+type DeliveryStatus = 'sent' | 'delivered' | 'read';
+
+export function MessageBubble({ message, onStar, onDelete, onAnalyze, isHighlighted }: MessageBubbleProps) {
   const { toast } = useToast();
   const isUser = message.sender === 'user';
-  const [showMenu, setShowMenu] = useState(false);
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
+
+  // Calculate delivery status based on message age
+  const getDeliveryStatus = (timestamp: string): DeliveryStatus => {
+    const messageTime = new Date(timestamp).getTime();
+    const now = Date.now();
+    const diffMinutes = (now - messageTime) / 1000 / 60;
+
+    if (diffMinutes < 1) return 'sent';
+    if (diffMinutes < 5) return 'delivered';
+    return 'read';
+  };
+
+  const deliveryStatus = isUser ? getDeliveryStatus(message.timestamp) : null;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(message.text);
@@ -53,13 +68,31 @@ export function MessageBubble({ message, onStar, onDelete, onAnalyze }: MessageB
     });
   };
 
+  const renderDeliveryStatus = () => {
+    if (!isUser || !deliveryStatus) return null;
+
+    const iconClass = "w-3 h-3";
+    
+    switch (deliveryStatus) {
+      case 'sent':
+        return <Check className={cn(iconClass, "text-muted-foreground")} />;
+      case 'delivered':
+        return <CheckCheck className={cn(iconClass, "text-muted-foreground")} />;
+      case 'read':
+        return <CheckCheck className={cn(iconClass, "text-primary")} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
         <div
           className={cn(
-            'flex flex-col max-w-[80%] mb-2',
-            isUser ? 'ml-auto items-end' : 'mr-auto items-start'
+            'flex flex-col max-w-[80%] mb-2 transition-all duration-300',
+            isUser ? 'ml-auto items-end' : 'mr-auto items-start',
+            isHighlighted && 'animate-pulse bg-primary/10 rounded-2xl p-1 -m-1'
           )}
         >
           <div
@@ -75,9 +108,12 @@ export function MessageBubble({ message, onStar, onDelete, onAnalyze }: MessageB
             )}
             <p className="text-sm leading-relaxed">{message.text}</p>
           </div>
-          <span className="text-[10px] text-muted-foreground mt-1 px-1">
-            {formatTime(message.timestamp)}
-          </span>
+          <div className="flex items-center gap-1 mt-1 px-1">
+            <span className="text-[10px] text-muted-foreground">
+              {formatTime(message.timestamp)}
+            </span>
+            {renderDeliveryStatus()}
+          </div>
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-48">
