@@ -59,7 +59,7 @@ export default function Home() {
   }, [toast]);
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="h-screen bg-background relative flex flex-col">
       <Header
         title="SecureChat"
         showSearch
@@ -108,8 +108,7 @@ export default function Home() {
 
       <PullToRefresh 
         onRefresh={handleRefresh}
-        className="pb-24"
-        style={{ maxHeight: 'calc(100vh - 64px)' }}
+        className="flex-1 pb-24 scrollbar-autohide"
       >
         {searchQuery && filteredChats.length === 0 ? (
           <EmptyState type="search" />
