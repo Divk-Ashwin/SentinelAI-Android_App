@@ -6,16 +6,14 @@ interface PullToRefreshProps {
   children: ReactNode;
   onRefresh: () => Promise<void> | void;
   className?: string;
-  style?: React.CSSProperties;
 }
 
-export function PullToRefresh({ children, onRefresh, className, style }: PullToRefreshProps) {
+export function PullToRefresh({ children, onRefresh, className }: PullToRefreshProps) {
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isPulling, setIsPulling] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const startYRef = useRef(0);
-  const currentYRef = useRef(0);
 
   const PULL_THRESHOLD = 80;
   const MAX_PULL = 120;
@@ -37,11 +35,10 @@ export function PullToRefresh({ children, onRefresh, className, style }: PullToR
       return;
     }
 
-    currentYRef.current = e.touches[0].clientY;
-    const diff = currentYRef.current - startYRef.current;
+    const currentY = e.touches[0].clientY;
+    const diff = currentY - startYRef.current;
     
     if (diff > 0) {
-      // Apply resistance to make it feel natural
       const resistance = Math.min(diff * 0.5, MAX_PULL);
       setPullDistance(resistance);
     }
@@ -53,7 +50,7 @@ export function PullToRefresh({ children, onRefresh, className, style }: PullToR
 
     if (pullDistance >= PULL_THRESHOLD && !isRefreshing) {
       setIsRefreshing(true);
-      setPullDistance(60); // Keep indicator visible during refresh
+      setPullDistance(60);
       
       try {
         await onRefresh();
@@ -69,12 +66,18 @@ export function PullToRefresh({ children, onRefresh, className, style }: PullToR
   const progress = Math.min(pullDistance / PULL_THRESHOLD, 1);
 
   return (
-    <div className={cn("relative overflow-hidden", className)} style={style}>
+    <div 
+      ref={containerRef}
+      className={cn("overflow-y-auto overflow-x-hidden", className)}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Pull indicator */}
       <div 
-        className="absolute left-0 right-0 flex items-center justify-center z-10 pointer-events-none"
+        className="flex items-center justify-center pointer-events-none"
         style={{ 
-          top: pullDistance - 50,
+          height: pullDistance,
           opacity: progress,
           transition: isPulling ? 'none' : 'all 0.3s ease-out'
         }}
@@ -95,20 +98,8 @@ export function PullToRefresh({ children, onRefresh, className, style }: PullToR
         </div>
       </div>
 
-      {/* Content container */}
-      <div
-        ref={containerRef}
-        className="h-full overflow-y-auto scrollbar-autohide"
-        style={{ 
-          transform: `translateY(${pullDistance}px)`,
-          transition: isPulling ? 'none' : 'transform 0.3s ease-out'
-        }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        {children}
-      </div>
+      {/* Content */}
+      {children}
     </div>
   );
 }
