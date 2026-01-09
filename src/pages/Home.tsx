@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/chat/Header';
 import { ChatListItem } from '@/components/chat/ChatListItem';
 import { FloatingActionButton } from '@/components/chat/FloatingActionButton';
 import { EmptyState } from '@/components/chat/EmptyState';
 import { Avatar } from '@/components/chat/Avatar';
+import { PullToRefresh } from '@/components/chat/PullToRefresh';
 import { useChat } from '@/context/ChatContext';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -21,8 +22,6 @@ export default function Home() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const filteredChats = chats.filter(chat => {
     const searchLower = searchQuery.toLowerCase();
@@ -50,34 +49,14 @@ export default function Home() {
     setMenuOpen(false);
   };
 
-  // Handle scroll for auto-hide scrollbar
-  const handleScroll = useCallback(() => {
-    const element = scrollRef.current;
-    if (!element) return;
-
-    element.classList.add('scrolling');
-
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-
-    scrollTimeoutRef.current = setTimeout(() => {
-      element.classList.remove('scrolling');
-    }, 1500);
-  }, []);
-
-  useEffect(() => {
-    const element = scrollRef.current;
-    if (!element) return;
-
-    element.addEventListener('scroll', handleScroll);
-    return () => {
-      element.removeEventListener('scroll', handleScroll);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, [handleScroll]);
+  const handleRefresh = useCallback(async () => {
+    // Simulate network refresh
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    toast({
+      title: "Refreshed",
+      description: "Your conversations are up to date.",
+    });
+  }, [toast]);
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -127,9 +106,9 @@ export default function Home() {
         }
       />
 
-      <main 
-        ref={scrollRef}
-        className="pb-24 overflow-y-auto scrollbar-autohide" 
+      <PullToRefresh 
+        onRefresh={handleRefresh}
+        className="pb-24"
         style={{ maxHeight: 'calc(100vh - 64px)' }}
       >
         {searchQuery && filteredChats.length === 0 ? (
@@ -143,7 +122,7 @@ export default function Home() {
             ))}
           </div>
         )}
-      </main>
+      </PullToRefresh>
 
       <FloatingActionButton />
     </div>
