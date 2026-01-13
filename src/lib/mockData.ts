@@ -1,4 +1,4 @@
-// Mock data for the SecureChat messaging application
+// Mock data for the SentinelAI messaging application
 
 export interface Message {
   id: string;

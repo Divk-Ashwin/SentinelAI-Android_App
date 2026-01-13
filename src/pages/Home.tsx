@@ -61,7 +61,7 @@ export default function Home() {
   return (
     <div className="h-screen bg-background relative flex flex-col">
       <Header
-        title="SecureChat"
+        title="SentinelAI"
         showSearch
         onSearchChange={setSearchQuery}
         leftContent={
