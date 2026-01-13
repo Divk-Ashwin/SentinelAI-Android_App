@@ -46,7 +46,7 @@ export function MessageBubble({ message, onStar, onDelete, onAnalyze, isHighligh
     navigator.clipboard.writeText(message.text);
     toast({
       title: "Copied to clipboard",
-      description: "Message text has been copied.",
+      duration: 1000,
     });
   };
 
@@ -54,7 +54,7 @@ export function MessageBubble({ message, onStar, onDelete, onAnalyze, isHighligh
     onDelete();
     toast({
       title: "Message deleted",
-      description: "The message has been removed.",
+      duration: 1000,
     });
   };
 
@@ -62,9 +62,7 @@ export function MessageBubble({ message, onStar, onDelete, onAnalyze, isHighligh
     onStar();
     toast({
       title: message.isStarred ? "Star removed" : "Message starred",
-      description: message.isStarred 
-        ? "The star has been removed from this message." 
-        : "You can find starred messages easily.",
+      duration: 1000,
     });
   };
 
