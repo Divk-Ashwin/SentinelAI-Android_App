@@ -81,17 +81,9 @@ export default function Home() {
                 <CheckCheck className="w-4 h-4" />
                 Mark all as read
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleDeleteAll} className="gap-3 text-destructive focus:text-destructive">
-                <Trash2 className="w-4 h-4" />
-                Delete all conversations
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => { navigate('/starred'); setMenuOpen(false); }} className="gap-3">
                 <Star className="w-4 h-4" />
                 Starred messages
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { navigate('/settings'); setMenuOpen(false); }} className="gap-3">
-                <Settings className="w-4 h-4" />
-                Settings
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => { navigate('/archived'); setMenuOpen(false); }} className="gap-3">
                 <Archive className="w-4 h-4" />
@@ -100,6 +92,14 @@ export default function Home() {
               <DropdownMenuItem onClick={() => { navigate('/blocked'); setMenuOpen(false); }} className="gap-3">
                 <ShieldOff className="w-4 h-4" />
                 Spam & blocked
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { navigate('/settings'); setMenuOpen(false); }} className="gap-3">
+                <Settings className="w-4 h-4" />
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDeleteAll} className="gap-3 text-destructive focus:text-destructive">
+                <Trash2 className="w-4 h-4" />
+                Delete all conversations
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
