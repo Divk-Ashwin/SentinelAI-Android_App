@@ -103,13 +103,10 @@ export function MessageBubble({ message, onStar, onDelete, onAnalyze, isHighligh
           >
             {message.isStarred && (
               <div className={cn(
-                "absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center",
-                isUser ? "bg-background shadow-sm" : "bg-primary"
+                "absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center shadow-sm",
+                isUser ? "bg-background" : "bg-card border border-border"
               )}>
-                <Star className={cn(
-                  "w-3 h-3 fill-chart-1 text-chart-1",
-                  !isUser && "fill-primary-foreground text-primary-foreground"
-                )} />
+                <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
               </div>
             )}
             <p className="text-sm leading-relaxed">{message.text}</p>
