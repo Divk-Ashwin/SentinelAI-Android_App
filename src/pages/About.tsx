@@ -22,7 +22,7 @@ export default function About() {
           <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
             <Shield className="w-10 h-10 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">SecureChat</h1>
+          <h1 className="text-2xl font-bold text-foreground">SentinelAI</h1>
           <p className="text-muted-foreground mt-1">Version 1.0.0 (Beta)</p>
         </div>
 
@@ -33,7 +33,7 @@ export default function About() {
             <div>
               <h3 className="font-medium text-foreground mb-2">Security-First Messaging</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                SecureChat is a privacy-focused messaging application designed with security at its core. 
+                SentinelAI is a privacy-focused messaging application designed with security at its core. 
                 Our ML-powered spam detection helps protect you from unwanted messages, while end-to-end 
                 encryption ensures your conversations remain private.
               </p>
@@ -68,7 +68,7 @@ export default function About() {
 
         {/* Copyright */}
         <div className="text-center text-sm text-muted-foreground">
-          <p>© 2026 SecureChat. All rights reserved.</p>
+          <p>© 2026 SentinelAI. All rights reserved.</p>
           <p className="mt-1">Made with security in mind.</p>
         </div>
       </main>
