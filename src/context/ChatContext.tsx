@@ -21,6 +21,8 @@ interface ChatContextType {
   archiveChat: (chatId: string) => void;
   unarchiveChat: (chatId: string) => void;
   starMessage: (chatId: string, messageId: string) => void;
+  starConversation: (chatId: string) => void;
+  isConversationStarred: (chatId: string) => boolean;
   deleteMessage: (chatId: string, messageId: string) => void;
   markAsRead: (chatId: string) => void;
   markAsUnread: (chatId: string) => void;
@@ -35,6 +37,7 @@ interface ChatContextType {
   blockContact: (chatId: string) => void;
   unblockContact: (contactId: string) => void;
   getStarredMessages: () => Array<{ chat: Chat; message: Message }>;
+  getStarredConversations: () => Chat[];
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -53,6 +56,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [pinnedChatIds, setPinnedChatIds] = useState<Set<string>>(new Set());
+  const [starredChatIds, setStarredChatIds] = useState<Set<string>>(new Set());
 
   const getChatById = (id: string): Chat | undefined => {
     return chats.find(c => c.id === id) || archived.find(c => c.id === id);
@@ -260,6 +264,26 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const starConversation = (chatId: string) => {
+    setStarredChatIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(chatId)) {
+        newSet.delete(chatId);
+      } else {
+        newSet.add(chatId);
+      }
+      return newSet;
+    });
+  };
+
+  const isConversationStarred = (chatId: string): boolean => {
+    return starredChatIds.has(chatId);
+  };
+
+  const getStarredConversations = (): Chat[] => {
+    return [...chats, ...archived].filter(chat => starredChatIds.has(chat.id));
+  };
+
   // Sort chats with pinned at top
   const sortedChats = [...chats].sort((a, b) => {
     const aPinned = pinnedChatIds.has(a.id);
@@ -285,6 +309,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         archiveChat,
         unarchiveChat,
         starMessage,
+        starConversation,
+        isConversationStarred,
         deleteMessage,
         markAsRead,
         markAsUnread,
@@ -299,6 +325,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         blockContact,
         unblockContact,
         getStarredMessages,
+        getStarredConversations,
       }}
     >
       {children}

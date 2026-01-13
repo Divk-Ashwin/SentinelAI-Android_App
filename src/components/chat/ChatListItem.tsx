@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Avatar } from './Avatar';
 import { Chat } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
-import { AlertTriangle, Pin, Mail, MailOpen, UserPlus, Archive, Trash2, ShieldOff, Info } from 'lucide-react';
+import { AlertTriangle, Pin, Mail, MailOpen, UserPlus, Archive, Trash2, ShieldOff, Info, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useChat } from '@/context/ChatContext';
 import {
@@ -40,10 +40,13 @@ export function ChatListItem({ chat }: ChatListItemProps) {
     archiveChat, 
     deleteChat,
     blockContact,
+    starConversation,
+    isConversationStarred,
     contacts 
   } = useChat();
   const displayName = chat.contactName || chat.contactPhone;
   const pinned = isPinned(chat.id);
+  const starred = isConversationStarred(chat.id);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
 
@@ -90,6 +93,14 @@ export function ChatListItem({ chat }: ChatListItemProps) {
     blockContact(chat.id);
     toast({ title: "Contact blocked", description: "You will no longer receive messages from this contact." });
     setBlockDialogOpen(false);
+  };
+
+  const handleStarToggle = () => {
+    starConversation(chat.id);
+    toast({ 
+      title: starred ? "Conversation unstarred" : "Conversation starred",
+      description: starred ? undefined : "You can find it in your starred messages."
+    });
   };
 
   return (
@@ -160,6 +171,10 @@ export function ChatListItem({ chat }: ChatListItemProps) {
           <ContextMenuItem onClick={handlePinToggle} className="gap-3">
             <Pin className={cn("w-4 h-4", pinned && "fill-current")} />
             {pinned ? "Unpin conversation" : "Pin conversation"}
+          </ContextMenuItem>
+          <ContextMenuItem onClick={handleStarToggle} className="gap-3">
+            <Star className={cn("w-4 h-4", starred && "fill-yellow-500 text-yellow-500")} />
+            {starred ? "Unstar conversation" : "Star conversation"}
           </ContextMenuItem>
           <ContextMenuItem onClick={() => navigate(`/contact/${chat.id}`)} className="gap-3">
             <Info className="w-4 h-4" />
