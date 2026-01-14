@@ -1,5 +1,19 @@
 // Mock data for the SentinelAI messaging application
 
+export interface MessageAttachment {
+  type: 'image' | 'gif' | 'contact' | 'location';
+  url?: string;
+  contact?: {
+    name: string;
+    phone: string;
+  };
+  location?: {
+    name: string;
+    address: string;
+    coordinates?: { lat: number; lng: number };
+  };
+}
+
 export interface Message {
   id: string;
   text: string;
@@ -7,6 +21,7 @@ export interface Message {
   sender: 'user' | 'contact';
   isStarred: boolean;
   isRead: boolean;
+  attachment?: MessageAttachment;
 }
 
 export interface Chat {

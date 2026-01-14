@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Chat, Message, Contact, mockChats, archivedChats, mockContacts } from '@/lib/mockData';
+import { Chat, Message, Contact, MessageAttachment, mockChats, archivedChats, mockContacts } from '@/lib/mockData';
 
 export interface BlockedContact {
   id: string;
@@ -16,7 +16,7 @@ interface ChatContextType {
   currentChatId: string | null;
   setCurrentChatId: (id: string | null) => void;
   getChatById: (id: string) => Chat | undefined;
-  sendMessage: (chatId: string, text: string) => void;
+  sendMessage: (chatId: string, text: string, attachment?: MessageAttachment) => void;
   deleteChat: (chatId: string) => void;
   archiveChat: (chatId: string) => void;
   unarchiveChat: (chatId: string) => void;
@@ -62,7 +62,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     return chats.find(c => c.id === id) || archived.find(c => c.id === id);
   };
 
-  const sendMessage = (chatId: string, text: string) => {
+  const sendMessage = (chatId: string, text: string, attachment?: MessageAttachment) => {
     const newMessage: Message = {
       id: `msg_${Date.now()}`,
       text,
@@ -70,14 +70,34 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       sender: 'user',
       isStarred: false,
       isRead: true,
+      attachment,
     };
+
+    // Generate last message preview
+    let lastMessagePreview = text;
+    if (attachment) {
+      switch (attachment.type) {
+        case 'image':
+          lastMessagePreview = '📷 Image';
+          break;
+        case 'gif':
+          lastMessagePreview = 'GIF';
+          break;
+        case 'contact':
+          lastMessagePreview = `👤 Contact: ${attachment.contact?.name}`;
+          break;
+        case 'location':
+          lastMessagePreview = `📍 Location: ${attachment.location?.name}`;
+          break;
+      }
+    }
 
     setChats(prev => prev.map(chat => {
       if (chat.id === chatId) {
         return {
           ...chat,
           messages: [...chat.messages, newMessage],
-          lastMessage: text,
+          lastMessage: lastMessagePreview,
           timestamp: 'Just now',
         };
       }

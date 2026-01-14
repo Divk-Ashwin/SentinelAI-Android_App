@@ -4,10 +4,16 @@ import { Header } from '@/components/chat/Header';
 import { MessageBubble } from '@/components/chat/MessageBubble';
 import { AnalyzeModal } from '@/components/chat/AnalyzeModal';
 import { SearchMessagesModal } from '@/components/chat/SearchMessagesModal';
+import { AttachmentMenu, AttachmentType } from '@/components/chat/AttachmentMenu';
+import { ImagePickerModal } from '@/components/chat/ImagePickerModal';
+import { GifPickerModal } from '@/components/chat/GifPickerModal';
+import { ContactPickerModal } from '@/components/chat/ContactPickerModal';
+import { LocationPickerModal } from '@/components/chat/LocationPickerModal';
 import { useChat } from '@/context/ChatContext';
 import { useToast } from '@/hooks/use-toast';
 import { Send, Paperclip, AlertTriangle, X, Star, Search, Archive, Trash2, ShieldOff, UserPlus, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { MessageAttachment, Contact } from '@/lib/mockData';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +49,12 @@ export default function ChatView() {
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
+  
+  // Attachment modals
+  const [imagePickerOpen, setImagePickerOpen] = useState(false);
+  const [gifPickerOpen, setGifPickerOpen] = useState(false);
+  const [contactPickerOpen, setContactPickerOpen] = useState(false);
+  const [locationPickerOpen, setLocationPickerOpen] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -162,6 +174,40 @@ export default function ChatView() {
   const handleAnalyze = (messageText: string) => {
     setSelectedMessageText(messageText);
     setAnalyzeModalOpen(true);
+  };
+
+  // Attachment handlers
+  const handleAttachmentSelect = (type: AttachmentType) => {
+    switch (type) {
+      case 'image':
+        setImagePickerOpen(true);
+        break;
+      case 'gif':
+        setGifPickerOpen(true);
+        break;
+      case 'contact':
+        setContactPickerOpen(true);
+        break;
+      case 'location':
+        setLocationPickerOpen(true);
+        break;
+    }
+  };
+
+  const handleImageSelect = (imageUrl: string) => {
+    sendMessage(chat.id, '', { type: 'image', url: imageUrl });
+  };
+
+  const handleGifSelect = (gifUrl: string) => {
+    sendMessage(chat.id, '', { type: 'gif', url: gifUrl });
+  };
+
+  const handleContactSelect = (contact: Contact) => {
+    sendMessage(chat.id, '', { type: 'contact', contact: { name: contact.name, phone: contact.phone } });
+  };
+
+  const handleLocationSelect = (location: { name: string; address: string; coordinates?: { lat: number; lng: number } }) => {
+    sendMessage(chat.id, '', { type: 'location', location });
   };
 
   const handleDelete = () => {
@@ -334,12 +380,11 @@ export default function ChatView() {
       {/* Message Composer */}
       <div className="sticky bottom-0 bg-card border-t border-border p-3">
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => toast({ title: "Coming soon", description: "Attachments will be available in a future update." })}
-            className="p-2.5 rounded-full hover:bg-muted transition-colors text-muted-foreground"
-          >
-            <Paperclip className="w-5 h-5" />
-          </button>
+          <AttachmentMenu onSelect={handleAttachmentSelect}>
+            <button className="p-2.5 rounded-full hover:bg-muted transition-colors text-muted-foreground">
+              <Paperclip className="w-5 h-5" />
+            </button>
+          </AttachmentMenu>
           
           <input
             ref={inputRef}
@@ -365,6 +410,28 @@ export default function ChatView() {
           </button>
         </div>
       </div>
+
+      {/* Attachment Modals */}
+      <ImagePickerModal
+        isOpen={imagePickerOpen}
+        onClose={() => setImagePickerOpen(false)}
+        onSelect={handleImageSelect}
+      />
+      <GifPickerModal
+        isOpen={gifPickerOpen}
+        onClose={() => setGifPickerOpen(false)}
+        onSelect={handleGifSelect}
+      />
+      <ContactPickerModal
+        isOpen={contactPickerOpen}
+        onClose={() => setContactPickerOpen(false)}
+        onSelect={handleContactSelect}
+      />
+      <LocationPickerModal
+        isOpen={locationPickerOpen}
+        onClose={() => setLocationPickerOpen(false)}
+        onSelect={handleLocationSelect}
+      />
 
       {/* Analyze Modal */}
       <AnalyzeModal
