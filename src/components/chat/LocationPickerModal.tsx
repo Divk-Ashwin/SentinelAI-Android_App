@@ -86,7 +86,7 @@ export function LocationPickerModal({ isOpen, onClose, onSelect }: LocationPicke
           </div>
 
           {/* Location List */}
-          <div className="overflow-y-auto flex-1 space-y-1">
+          <div className="overflow-y-auto flex-1 space-y-1 scrollbar-thin">
             {filteredLocations.map((location) => {
               const IconComponent = location.icon;
               return (

@@ -108,7 +108,7 @@ export default function Home() {
 
       <PullToRefresh 
         onRefresh={handleRefresh}
-        className="flex-1 pb-24 scrollbar-autohide"
+        className="flex-1 pb-24 scrollbar-thin"
       >
         {searchQuery && filteredChats.length === 0 ? (
           <EmptyState type="search" />
