@@ -126,9 +126,14 @@ export function ChatListItem({ chat }: ChatListItemProps) {
                     {displayName}
                   </span>
                 </div>
-                <span className="text-xs text-muted-foreground shrink-0">
-                  {chat.timestamp}
-                </span>
+                <div className="flex flex-col items-end gap-0.5 shrink-0">
+                  <span className="text-xs text-muted-foreground">
+                    {chat.timestamp}
+                  </span>
+                  {starred && (
+                    <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
+                  )}
+                </div>
               </div>
               
               <div className="flex items-center gap-2 mt-0.5">
@@ -154,7 +159,7 @@ export function ChatListItem({ chat }: ChatListItemProps) {
             </div>
           </div>
         </ContextMenuTrigger>
-        <ContextMenuContent className="w-56">
+        <ContextMenuContent className="w-56" collisionPadding={16}>
           <ContextMenuItem onClick={handleMarkReadToggle} className="gap-3">
             {chat.unread ? (
               <>
