@@ -12,6 +12,7 @@ interface HeaderProps {
   onSearchChange?: (query: string) => void;
   onMenuClick?: () => void;
   onTitleClick?: () => void;
+  onBack?: () => void;
   leftContent?: React.ReactNode;
   rightContent?: React.ReactNode;
 }
@@ -25,6 +26,7 @@ export function Header({
   onSearchChange,
   onMenuClick,
   onTitleClick,
+  onBack,
   leftContent,
   rightContent,
 }: HeaderProps) {
@@ -50,7 +52,7 @@ export function Header({
       <div className="flex items-center h-14 px-2">
         {showBack && (
           <button
-            onClick={() => navigate(-1)}
+            onClick={onBack ?? (() => navigate(-1))}
             className="p-2 rounded-full hover:bg-muted transition-colors"
           >
             <ChevronLeft className="w-6 h-6 text-foreground" />

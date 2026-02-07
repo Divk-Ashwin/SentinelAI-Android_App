@@ -102,10 +102,10 @@ export function MessageBubble({ message, onStar, onDelete, onAnalyze, isHighligh
           >
             {message.isStarred && (
               <div className={cn(
-                "absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center shadow-sm z-10",
-                isUser ? "bg-background" : "bg-card border border-border"
+                "absolute -top-1.5 z-10 w-6 h-6 rounded-full flex items-center justify-center shadow-sm",
+                isUser ? "-right-1.5 bg-background border border-border" : "-left-1.5 bg-card border border-border"
               )}>
-                <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
+                <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
               </div>
             )}
             
@@ -206,7 +206,7 @@ export function MessageBubble({ message, onStar, onDelete, onAnalyze, isHighligh
           </div>
         </div>
       </ContextMenuTrigger>
-      <ContextMenuContent className="w-48">
+      <ContextMenuContent className="w-48" collisionPadding={16}>
         <ContextMenuItem onClick={handleCopy} className="gap-2">
           <Copy className="w-4 h-4" />
           Copy
