@@ -4,7 +4,8 @@ import { SettingsItem } from '@/components/chat/SettingsItem';
 import { useChat } from '@/context/ChatContext';
 import { useTheme } from '@/hooks/use-theme';
 import { useToast } from '@/hooks/use-toast';
-import { Palette, Shield, Bell, Brain, Database, Info, Sun, Moon, Monitor } from 'lucide-react';
+import { Palette, Shield, Bell, Brain, Database, Info, Sun, Moon, Monitor, LogOut } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +19,7 @@ export default function Settings() {
   const { notificationsEnabled, toggleNotifications } = useChat();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const { logout, user } = useAuth();
 
   const handleNotificationToggle = (value: boolean) => {
     toggleNotifications();
@@ -154,6 +156,26 @@ export default function Settings() {
             label="About"
             showChevron
             onClick={() => navigate('/about')}
+          />
+        </div>
+
+        {/* Account Section */}
+        <div className="mb-6">
+          <h3 className="px-4 py-2 text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            Account
+          </h3>
+          {user && (
+            <div className="px-4 py-2 text-sm text-muted-foreground">
+              Signed in as {user.phone}
+            </div>
+          )}
+          <SettingsItem
+            icon={<LogOut className="w-5 h-5" />}
+            label="Logout"
+            onClick={() => {
+              logout();
+              toast({ title: "Logged out", description: "You have been signed out." });
+            }}
           />
         </div>
       </main>
