@@ -279,7 +279,7 @@ export default function ChatView() {
       <Header
         title={displayName}
         showBack
-        onBack={() => navigate('/')}
+        onBack={() => navigate('/', { replace: true })}
         onTitleClick={() => navigate(`/contact/${chat.id}`)}
         rightContent={
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
