@@ -52,7 +52,7 @@ export default function SenderDetails() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header title="Contact Details" showBack />
+      <Header title="Contact Details" showBack onBack={() => navigate(`/chat/${chatId}`)} />
 
       <main className="px-4 py-8">
         {/* Profile Section */}

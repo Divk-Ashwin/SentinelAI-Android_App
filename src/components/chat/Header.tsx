@@ -52,7 +52,7 @@ export function Header({
       <div className="flex items-center h-14 px-2">
         {showBack && (
           <button
-            onClick={onBack ?? (() => navigate(-1))}
+            onClick={onBack ?? (() => navigate('/', { replace: true }))}
             className="p-2 rounded-full hover:bg-muted transition-colors"
           >
             <ChevronLeft className="w-6 h-6 text-foreground" />
