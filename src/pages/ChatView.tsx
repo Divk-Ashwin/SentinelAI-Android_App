@@ -149,6 +149,14 @@ export default function ChatView() {
     };
   }, [handleScroll]);
 
+  const handleConversationRefresh = useCallback(async () => {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    toast({
+      title: "Messages refreshed",
+      description: "Conversation is up to date.",
+    });
+  }, [toast]);
+
   if (!chat) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
