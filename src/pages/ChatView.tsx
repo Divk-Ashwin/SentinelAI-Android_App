@@ -284,13 +284,6 @@ export default function ChatView() {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  const handleConversationRefresh = useCallback(async () => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    toast({
-      title: "Messages refreshed",
-      description: "Conversation is up to date.",
-    });
-  }, [toast]);
 
   return (
     <PageTransition>
