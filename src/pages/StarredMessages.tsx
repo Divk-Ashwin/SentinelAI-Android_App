@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/chat/Header';
 import { Avatar } from '@/components/chat/Avatar';
+import { PageTransition } from '@/components/PageTransition';
 import { useChat } from '@/context/ChatContext';
 import { useToast } from '@/hooks/use-toast';
 import { Star, MessageCircle } from 'lucide-react';
