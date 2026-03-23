@@ -14,6 +14,7 @@ export default function About() {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       <Header title="About" showBack />
 
