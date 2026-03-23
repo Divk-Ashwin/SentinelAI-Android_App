@@ -54,6 +54,7 @@ export default function BlockedContacts() {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       <Header
         title="Blocked Contacts"
