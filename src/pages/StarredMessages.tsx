@@ -174,5 +174,6 @@ export default function StarredMessages() {
         )}
       </main>
     </div>
+    </PageTransition>
   );
 }

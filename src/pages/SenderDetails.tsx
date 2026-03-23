@@ -136,5 +136,6 @@ export default function SenderDetails() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </PageTransition>
   );
 }

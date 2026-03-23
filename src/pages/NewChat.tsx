@@ -103,5 +103,6 @@ export default function NewChat() {
         )}
       </main>
     </div>
+    </PageTransition>
   );
 }

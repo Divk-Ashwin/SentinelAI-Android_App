@@ -129,5 +129,6 @@ export default function BlockedContacts() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </PageTransition>
   );
 }

@@ -106,5 +106,6 @@ export default function Archived() {
         )}
       </main>
     </div>
+    </PageTransition>
   );
 }
