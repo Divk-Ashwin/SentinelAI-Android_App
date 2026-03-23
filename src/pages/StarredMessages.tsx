@@ -63,6 +63,7 @@ export default function StarredMessages() {
   const hasNoStarred = starredMessages.length === 0 && starredConversations.length === 0;
 
   return (
+    <PageTransition>
     <div className="h-screen bg-background flex flex-col">
       <Header
         title="Starred"
