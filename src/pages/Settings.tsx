@@ -41,6 +41,7 @@ export default function Settings() {
   const currentThemeLabel = themeOptions.find(t => t.value === theme)?.label || 'System';
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       <Header title="Settings" showBack />
 
