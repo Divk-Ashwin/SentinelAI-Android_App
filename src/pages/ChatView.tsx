@@ -64,7 +64,7 @@ export default function ChatView() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [initialScrollDone, setInitialScrollDone] = useState(false);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const chat = getChatById(chatId || '');
