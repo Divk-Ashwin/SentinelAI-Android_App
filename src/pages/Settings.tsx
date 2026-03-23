@@ -5,6 +5,7 @@ import { useChat } from '@/context/ChatContext';
 import { useTheme } from '@/hooks/use-theme';
 import { useToast } from '@/hooks/use-toast';
 import { Palette, Shield, Bell, Brain, Database, Info, Sun, Moon, Monitor, LogOut } from 'lucide-react';
+import { PageTransition } from '@/components/PageTransition';
 import { useAuth } from '@/context/AuthContext';
 import {
   DropdownMenu,
