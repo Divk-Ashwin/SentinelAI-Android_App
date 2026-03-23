@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 
 export function useAutoHideScrollbar(delay = 1500) {
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const elementRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = useCallback(() => {
