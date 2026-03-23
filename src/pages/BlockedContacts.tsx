@@ -1,6 +1,7 @@
 import { Header } from '@/components/chat/Header';
 import { Avatar } from '@/components/chat/Avatar';
 import { EmptyState } from '@/components/chat/EmptyState';
+import { PageTransition } from '@/components/PageTransition';
 import { useChat } from '@/context/ChatContext';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
