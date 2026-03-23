@@ -388,7 +388,8 @@ export default function ChatView() {
           </div>
         ))}
         <div ref={messagesEndRef} />
-      </main>
+        </div>
+      </PullToRefresh>
 
       {/* Message Composer */}
       <div className="sticky bottom-0 bg-card border-t border-border p-3">
