@@ -5,6 +5,7 @@ import { useChat } from '@/context/ChatContext';
 import { useTheme } from '@/hooks/use-theme';
 import { useToast } from '@/hooks/use-toast';
 import { Palette, Shield, Bell, Brain, Database, Info, Sun, Moon, Monitor, LogOut } from 'lucide-react';
+import { PageTransition } from '@/components/PageTransition';
 import { useAuth } from '@/context/AuthContext';
 import {
   DropdownMenu,
@@ -40,6 +41,7 @@ export default function Settings() {
   const currentThemeLabel = themeOptions.find(t => t.value === theme)?.label || 'System';
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       <Header title="Settings" showBack />
 
@@ -180,5 +182,6 @@ export default function Settings() {
         </div>
       </main>
     </div>
+    </PageTransition>
   );
 }

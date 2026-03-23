@@ -9,6 +9,8 @@ import { ImagePickerModal } from '@/components/chat/ImagePickerModal';
 import { GifPickerModal } from '@/components/chat/GifPickerModal';
 import { ContactPickerModal } from '@/components/chat/ContactPickerModal';
 import { LocationPickerModal } from '@/components/chat/LocationPickerModal';
+import { PageTransition } from '@/components/PageTransition';
+import { PullToRefresh } from '@/components/chat/PullToRefresh';
 import { useChat } from '@/context/ChatContext';
 import { useToast } from '@/hooks/use-toast';
 import { Send, Paperclip, AlertTriangle, X, Star, Search, Archive, Trash2, ShieldOff, UserPlus, Info } from 'lucide-react';
@@ -62,7 +64,7 @@ export default function ChatView() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [initialScrollDone, setInitialScrollDone] = useState(false);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const chat = getChatById(chatId || '');
@@ -146,6 +148,14 @@ export default function ChatView() {
       }
     };
   }, [handleScroll]);
+
+  const handleConversationRefresh = useCallback(async () => {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    toast({
+      title: "Messages refreshed",
+      description: "Conversation is up to date.",
+    });
+  }, [toast]);
 
   if (!chat) {
     return (
@@ -274,7 +284,9 @@ export default function ChatView() {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+
   return (
+    <PageTransition>
     <div className="h-screen bg-background flex flex-col">
       <Header
         title={displayName}
@@ -339,7 +351,8 @@ export default function ChatView() {
       )}
 
       {/* Messages */}
-      <main ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-4 scrollbar-thin">
+      <PullToRefresh onRefresh={handleConversationRefresh} className="flex-1 scrollbar-thin">
+        <div ref={messagesContainerRef} className="px-4 py-4">
         {Object.entries(groupedMessages).map(([date, messages]) => (
           <div key={date}>
             <div className="flex justify-center my-4">
@@ -376,7 +389,8 @@ export default function ChatView() {
           </div>
         ))}
         <div ref={messagesEndRef} />
-      </main>
+        </div>
+      </PullToRefresh>
 
       {/* Message Composer */}
       <div className="sticky bottom-0 bg-card border-t border-border p-3">
@@ -486,5 +500,6 @@ export default function ChatView() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </PageTransition>
   );
 }

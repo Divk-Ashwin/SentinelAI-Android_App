@@ -1,4 +1,5 @@
 import { Header } from '@/components/chat/Header';
+import { PageTransition } from '@/components/PageTransition';
 import { Shield, Lock, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -13,6 +14,7 @@ export default function About() {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       <Header title="About" showBack />
 
@@ -73,5 +75,6 @@ export default function About() {
         </div>
       </main>
     </div>
+    </PageTransition>
   );
 }
