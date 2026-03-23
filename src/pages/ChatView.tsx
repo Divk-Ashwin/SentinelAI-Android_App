@@ -198,10 +198,7 @@ export default function ChatView() {
     setHighlightedMessageId(messageId);
     
     setTimeout(() => {
-      const messageElement = messageRefs.current[messageId];
-      if (messageElement) {
-        messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+      virtualListRef.current?.scrollToMessage(messageId);
     }, 100);
 
     setTimeout(() => {
@@ -209,25 +206,9 @@ export default function ChatView() {
     }, 2000);
   };
 
-  // Group messages by date
-  const groupedMessages = chat.messages.reduce((groups, message) => {
-    const date = new Date(message.timestamp).toDateString();
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(message);
-    return groups;
-  }, {} as Record<string, typeof chat.messages>);
-
-  const formatDateSeparator = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) return 'Today';
-    if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const handleAnalyze = (messageText: string) => {
+    setSelectedMessageText(messageText);
+    setAnalyzeModalOpen(true);
   };
 
 
