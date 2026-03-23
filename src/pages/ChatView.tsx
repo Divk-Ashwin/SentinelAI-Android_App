@@ -73,14 +73,9 @@ export default function ChatView() {
   useEffect(() => {
     if (highlightMessageId && chat?.messages) {
       setHighlightedMessageId(highlightMessageId);
-      // Scroll to the highlighted message
       setTimeout(() => {
-        const messageElement = messageRefs.current[highlightMessageId];
-        if (messageElement) {
-          messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+        virtualListRef.current?.scrollToMessage(highlightMessageId);
       }, 100);
-      // Clear highlight after 2 seconds
       setTimeout(() => {
         setHighlightedMessageId(null);
       }, 2000);
