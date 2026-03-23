@@ -350,7 +350,8 @@ export default function ChatView() {
       )}
 
       {/* Messages */}
-      <main ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-4 scrollbar-thin">
+      <PullToRefresh onRefresh={handleConversationRefresh} className="flex-1 scrollbar-thin">
+        <div ref={messagesContainerRef} className="px-4 py-4">
         {Object.entries(groupedMessages).map(([date, messages]) => (
           <div key={date}>
             <div className="flex justify-center my-4">
