@@ -84,59 +84,16 @@ export default function ChatView() {
 
   // Find first unread message index
   const firstUnreadIndex = chat?.messages.findIndex(m => !m.isRead && m.sender === 'contact') ?? -1;
-  const hasUnreadMessages = firstUnreadIndex !== -1;
 
-  // Initial scroll to unread divider or bottom
+  // Auto-scroll when new message is sent
   useEffect(() => {
-    if (!initialScrollDone && chat?.messages) {
-      if (hasUnreadMessages && unreadDividerRef.current) {
-        unreadDividerRef.current.scrollIntoView({ behavior: 'instant', block: 'start' });
-      } else {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
-      }
-      setInitialScrollDone(true);
-      setPreviousMessageCount(chat.messages.length);
-    }
-  }, [chat?.messages, hasUnreadMessages, initialScrollDone]);
-
-  // Auto-scroll only when new message is sent (message count increases)
-  useEffect(() => {
-    if (chat?.messages && initialScrollDone) {
-      if (chat.messages.length > previousMessageCount) {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chat?.messages) {
+      if (chat.messages.length > previousMessageCount && previousMessageCount > 0) {
+        virtualListRef.current?.scrollToBottom();
       }
       setPreviousMessageCount(chat.messages.length);
     }
-  }, [chat?.messages?.length, initialScrollDone, previousMessageCount]);
-
-  // Handle scroll for auto-hide scrollbar
-  const handleScroll = useCallback(() => {
-    const element = messagesContainerRef.current;
-    if (!element) return;
-
-    element.classList.add('scrolling');
-
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-
-    scrollTimeoutRef.current = setTimeout(() => {
-      element.classList.remove('scrolling');
-    }, 1500);
-  }, []);
-
-  useEffect(() => {
-    const element = messagesContainerRef.current;
-    if (!element) return;
-
-    element.addEventListener('scroll', handleScroll);
-    return () => {
-      element.removeEventListener('scroll', handleScroll);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, [handleScroll]);
+  }, [chat?.messages?.length, previousMessageCount]);
 
   const handleConversationRefresh = useCallback(async () => {
     await new Promise(resolve => setTimeout(resolve, 800));
