@@ -277,47 +277,17 @@ export default function ChatView() {
         </div>
       )}
 
-      {/* Messages */}
-      <PullToRefresh onRefresh={handleConversationRefresh} className="flex-1 scrollbar-thin">
-        <div ref={messagesContainerRef} className="px-4 py-4">
-        {Object.entries(groupedMessages).map(([date, messages]) => (
-          <div key={date}>
-            <div className="flex justify-center my-4">
-              <span className="px-3 py-1 bg-muted/50 text-muted-foreground text-xs rounded-full">
-                {formatDateSeparator(date)}
-              </span>
-            </div>
-            {messages.map((message, index) => {
-              const globalIndex = chat.messages.findIndex(m => m.id === message.id);
-              const showUnreadDivider = globalIndex === firstUnreadIndex;
-              
-              return (
-                <div 
-                  key={message.id}
-                  ref={(el) => { messageRefs.current[message.id] = el; }}
-                >
-                  {showUnreadDivider && (
-                    <div ref={unreadDividerRef} className="flex items-center gap-3 my-4">
-                      <div className="flex-1 h-px bg-primary/50" />
-                      <span className="text-xs font-medium text-primary">Unread messages</span>
-                      <div className="flex-1 h-px bg-primary/50" />
-                    </div>
-                  )}
-                  <MessageBubble
-                    message={message}
-                    onStar={() => starMessage(chat.id, message.id)}
-                    onDelete={() => deleteMessage(chat.id, message.id)}
-                    onAnalyze={() => handleAnalyze(message.text)}
-                    isHighlighted={highlightedMessageId === message.id}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-        </div>
-      </PullToRefresh>
+      {/* Messages - Virtual scrolling for performance */}
+      <VirtualMessageList
+        ref={virtualListRef}
+        messages={chat.messages}
+        chatId={chat.id}
+        firstUnreadIndex={firstUnreadIndex}
+        highlightedMessageId={highlightedMessageId}
+        onStar={(messageId) => starMessage(chat.id, messageId)}
+        onDelete={(messageId) => deleteMessage(chat.id, messageId)}
+        onAnalyze={(text) => { setSelectedMessageText(text); setAnalyzeModalOpen(true); }}
+      />
 
       {/* Message Composer */}
       <div className="sticky bottom-0 bg-card border-t border-border p-3">
