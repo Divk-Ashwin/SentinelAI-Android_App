@@ -9,6 +9,8 @@ import { ImagePickerModal } from '@/components/chat/ImagePickerModal';
 import { GifPickerModal } from '@/components/chat/GifPickerModal';
 import { ContactPickerModal } from '@/components/chat/ContactPickerModal';
 import { LocationPickerModal } from '@/components/chat/LocationPickerModal';
+import { PageTransition } from '@/components/PageTransition';
+import { PullToRefresh } from '@/components/chat/PullToRefresh';
 import { useChat } from '@/context/ChatContext';
 import { useToast } from '@/hooks/use-toast';
 import { Send, Paperclip, AlertTriangle, X, Star, Search, Archive, Trash2, ShieldOff, UserPlus, Info } from 'lucide-react';
