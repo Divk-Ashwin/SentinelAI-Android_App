@@ -57,14 +57,9 @@ export default function ChatView() {
   const [contactPickerOpen, setContactPickerOpen] = useState(false);
   const [locationPickerOpen, setLocationPickerOpen] = useState(false);
   
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const unreadDividerRef = useRef<HTMLDivElement>(null);
+  const virtualListRef = useRef<VirtualMessageListHandle>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [initialScrollDone, setInitialScrollDone] = useState(false);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
-  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const chat = getChatById(chatId || '');
 
