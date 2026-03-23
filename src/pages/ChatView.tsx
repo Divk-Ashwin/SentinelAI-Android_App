@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/chat/Header';
 import { VirtualMessageList, VirtualMessageListHandle } from '@/components/chat/VirtualMessageList';
