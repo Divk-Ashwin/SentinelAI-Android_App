@@ -36,6 +36,7 @@ export default function Archived() {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       <Header
         title="Archived"
