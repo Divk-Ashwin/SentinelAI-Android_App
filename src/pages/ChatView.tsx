@@ -499,5 +499,6 @@ export default function ChatView() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </PageTransition>
   );
 }
