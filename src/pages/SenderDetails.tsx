@@ -52,6 +52,7 @@ export default function SenderDetails() {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       <Header title="Contact Details" showBack onBack={() => navigate(`/chat/${chatId}`)} />
 
