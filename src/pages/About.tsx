@@ -1,4 +1,5 @@
 import { Header } from '@/components/chat/Header';
+import { PageTransition } from '@/components/PageTransition';
 import { Shield, Lock, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
