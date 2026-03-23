@@ -29,6 +29,7 @@ export default function NewChat() {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       <Header title="New Chat" showBack />
 
