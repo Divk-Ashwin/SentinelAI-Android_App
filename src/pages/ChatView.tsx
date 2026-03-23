@@ -95,13 +95,6 @@ export default function ChatView() {
     }
   }, [chat?.messages?.length, previousMessageCount]);
 
-  const handleConversationRefresh = useCallback(async () => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    toast({
-      title: "Messages refreshed",
-      description: "Conversation is up to date.",
-    });
-  }, [toast]);
 
   if (!chat) {
     return (
