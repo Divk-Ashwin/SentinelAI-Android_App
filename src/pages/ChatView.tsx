@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/chat/Header';
-import { MessageBubble } from '@/components/chat/MessageBubble';
+import { VirtualMessageList, VirtualMessageListHandle } from '@/components/chat/VirtualMessageList';
 import { AnalyzeModal } from '@/components/chat/AnalyzeModal';
 import { SearchMessagesModal } from '@/components/chat/SearchMessagesModal';
 import { AttachmentMenu, AttachmentType } from '@/components/chat/AttachmentMenu';
@@ -10,7 +10,6 @@ import { GifPickerModal } from '@/components/chat/GifPickerModal';
 import { ContactPickerModal } from '@/components/chat/ContactPickerModal';
 import { LocationPickerModal } from '@/components/chat/LocationPickerModal';
 import { PageTransition } from '@/components/PageTransition';
-import { PullToRefresh } from '@/components/chat/PullToRefresh';
 import { useChat } from '@/context/ChatContext';
 import { useToast } from '@/hooks/use-toast';
 import { Send, Paperclip, AlertTriangle, X, Star, Search, Archive, Trash2, ShieldOff, UserPlus, Info } from 'lucide-react';
