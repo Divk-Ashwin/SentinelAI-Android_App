@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/chat/Header';
 import { EmptyState } from '@/components/chat/EmptyState';
 import { Avatar } from '@/components/chat/Avatar';
+import { PageTransition } from '@/components/PageTransition';
 import { useChat } from '@/context/ChatContext';
 import { useToast } from '@/hooks/use-toast';
 import { Archive } from 'lucide-react';
@@ -35,6 +36,7 @@ export default function Archived() {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       <Header
         title="Archived"
@@ -104,5 +106,6 @@ export default function Archived() {
         )}
       </main>
     </div>
+    </PageTransition>
   );
 }

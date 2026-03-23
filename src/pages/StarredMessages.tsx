@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/chat/Header';
 import { Avatar } from '@/components/chat/Avatar';
+import { PageTransition } from '@/components/PageTransition';
 import { useChat } from '@/context/ChatContext';
 import { useToast } from '@/hooks/use-toast';
 import { Star, MessageCircle } from 'lucide-react';
@@ -62,6 +63,7 @@ export default function StarredMessages() {
   const hasNoStarred = starredMessages.length === 0 && starredConversations.length === 0;
 
   return (
+    <PageTransition>
     <div className="h-screen bg-background flex flex-col">
       <Header
         title="Starred"
@@ -172,5 +174,6 @@ export default function StarredMessages() {
         )}
       </main>
     </div>
+    </PageTransition>
   );
 }

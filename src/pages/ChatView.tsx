@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/chat/Header';
-import { MessageBubble } from '@/components/chat/MessageBubble';
+import { VirtualMessageList, VirtualMessageListHandle } from '@/components/chat/VirtualMessageList';
 import { AnalyzeModal } from '@/components/chat/AnalyzeModal';
 import { SearchMessagesModal } from '@/components/chat/SearchMessagesModal';
 import { AttachmentMenu, AttachmentType } from '@/components/chat/AttachmentMenu';
@@ -10,7 +10,6 @@ import { GifPickerModal } from '@/components/chat/GifPickerModal';
 import { ContactPickerModal } from '@/components/chat/ContactPickerModal';
 import { LocationPickerModal } from '@/components/chat/LocationPickerModal';
 import { PageTransition } from '@/components/PageTransition';
-import { PullToRefresh } from '@/components/chat/PullToRefresh';
 import { useChat } from '@/context/ChatContext';
 import { useToast } from '@/hooks/use-toast';
 import { Send, Paperclip, AlertTriangle, X, Star, Search, Archive, Trash2, ShieldOff, UserPlus, Info } from 'lucide-react';
@@ -58,14 +57,9 @@ export default function ChatView() {
   const [contactPickerOpen, setContactPickerOpen] = useState(false);
   const [locationPickerOpen, setLocationPickerOpen] = useState(false);
   
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const unreadDividerRef = useRef<HTMLDivElement>(null);
+  const virtualListRef = useRef<VirtualMessageListHandle>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [initialScrollDone, setInitialScrollDone] = useState(false);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
-  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const chat = getChatById(chatId || '');
 
@@ -79,14 +73,9 @@ export default function ChatView() {
   useEffect(() => {
     if (highlightMessageId && chat?.messages) {
       setHighlightedMessageId(highlightMessageId);
-      // Scroll to the highlighted message
       setTimeout(() => {
-        const messageElement = messageRefs.current[highlightMessageId];
-        if (messageElement) {
-          messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+        virtualListRef.current?.scrollToMessage(highlightMessageId);
       }, 100);
-      // Clear highlight after 2 seconds
       setTimeout(() => {
         setHighlightedMessageId(null);
       }, 2000);
@@ -95,67 +84,17 @@ export default function ChatView() {
 
   // Find first unread message index
   const firstUnreadIndex = chat?.messages.findIndex(m => !m.isRead && m.sender === 'contact') ?? -1;
-  const hasUnreadMessages = firstUnreadIndex !== -1;
 
-  // Initial scroll to unread divider or bottom
+  // Auto-scroll when new message is sent
   useEffect(() => {
-    if (!initialScrollDone && chat?.messages) {
-      if (hasUnreadMessages && unreadDividerRef.current) {
-        unreadDividerRef.current.scrollIntoView({ behavior: 'instant', block: 'start' });
-      } else {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
-      }
-      setInitialScrollDone(true);
-      setPreviousMessageCount(chat.messages.length);
-    }
-  }, [chat?.messages, hasUnreadMessages, initialScrollDone]);
-
-  // Auto-scroll only when new message is sent (message count increases)
-  useEffect(() => {
-    if (chat?.messages && initialScrollDone) {
-      if (chat.messages.length > previousMessageCount) {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chat?.messages) {
+      if (chat.messages.length > previousMessageCount && previousMessageCount > 0) {
+        virtualListRef.current?.scrollToBottom();
       }
       setPreviousMessageCount(chat.messages.length);
     }
-  }, [chat?.messages?.length, initialScrollDone, previousMessageCount]);
+  }, [chat?.messages?.length, previousMessageCount]);
 
-  // Handle scroll for auto-hide scrollbar
-  const handleScroll = useCallback(() => {
-    const element = messagesContainerRef.current;
-    if (!element) return;
-
-    element.classList.add('scrolling');
-
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-
-    scrollTimeoutRef.current = setTimeout(() => {
-      element.classList.remove('scrolling');
-    }, 1500);
-  }, []);
-
-  useEffect(() => {
-    const element = messagesContainerRef.current;
-    if (!element) return;
-
-    element.addEventListener('scroll', handleScroll);
-    return () => {
-      element.removeEventListener('scroll', handleScroll);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, [handleScroll]);
-
-  const handleConversationRefresh = useCallback(async () => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    toast({
-      title: "Messages refreshed",
-      description: "Conversation is up to date.",
-    });
-  }, [toast]);
 
   if (!chat) {
     return (
@@ -252,10 +191,7 @@ export default function ChatView() {
     setHighlightedMessageId(messageId);
     
     setTimeout(() => {
-      const messageElement = messageRefs.current[messageId];
-      if (messageElement) {
-        messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+      virtualListRef.current?.scrollToMessage(messageId);
     }, 100);
 
     setTimeout(() => {
@@ -263,26 +199,6 @@ export default function ChatView() {
     }, 2000);
   };
 
-  // Group messages by date
-  const groupedMessages = chat.messages.reduce((groups, message) => {
-    const date = new Date(message.timestamp).toDateString();
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(message);
-    return groups;
-  }, {} as Record<string, typeof chat.messages>);
-
-  const formatDateSeparator = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) return 'Today';
-    if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
 
 
   return (
@@ -350,47 +266,17 @@ export default function ChatView() {
         </div>
       )}
 
-      {/* Messages */}
-      <PullToRefresh onRefresh={handleConversationRefresh} className="flex-1 scrollbar-thin">
-        <div ref={messagesContainerRef} className="px-4 py-4">
-        {Object.entries(groupedMessages).map(([date, messages]) => (
-          <div key={date}>
-            <div className="flex justify-center my-4">
-              <span className="px-3 py-1 bg-muted/50 text-muted-foreground text-xs rounded-full">
-                {formatDateSeparator(date)}
-              </span>
-            </div>
-            {messages.map((message, index) => {
-              const globalIndex = chat.messages.findIndex(m => m.id === message.id);
-              const showUnreadDivider = globalIndex === firstUnreadIndex;
-              
-              return (
-                <div 
-                  key={message.id}
-                  ref={(el) => { messageRefs.current[message.id] = el; }}
-                >
-                  {showUnreadDivider && (
-                    <div ref={unreadDividerRef} className="flex items-center gap-3 my-4">
-                      <div className="flex-1 h-px bg-primary/50" />
-                      <span className="text-xs font-medium text-primary">Unread messages</span>
-                      <div className="flex-1 h-px bg-primary/50" />
-                    </div>
-                  )}
-                  <MessageBubble
-                    message={message}
-                    onStar={() => starMessage(chat.id, message.id)}
-                    onDelete={() => deleteMessage(chat.id, message.id)}
-                    onAnalyze={() => handleAnalyze(message.text)}
-                    isHighlighted={highlightedMessageId === message.id}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-        </div>
-      </PullToRefresh>
+      {/* Messages - Virtual scrolling for performance */}
+      <VirtualMessageList
+        ref={virtualListRef}
+        messages={chat.messages}
+        chatId={chat.id}
+        firstUnreadIndex={firstUnreadIndex}
+        highlightedMessageId={highlightedMessageId}
+        onStar={(messageId) => starMessage(chat.id, messageId)}
+        onDelete={(messageId) => deleteMessage(chat.id, messageId)}
+        onAnalyze={(text) => { setSelectedMessageText(text); setAnalyzeModalOpen(true); }}
+      />
 
       {/* Message Composer */}
       <div className="sticky bottom-0 bg-card border-t border-border p-3">

@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/chat/Header';
 import { Avatar } from '@/components/chat/Avatar';
+import { PageTransition } from '@/components/PageTransition';
 import { useChat } from '@/context/ChatContext';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -51,6 +52,7 @@ export default function SenderDetails() {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       <Header title="Contact Details" showBack onBack={() => navigate(`/chat/${chatId}`)} />
 
@@ -134,5 +136,6 @@ export default function SenderDetails() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </PageTransition>
   );
 }

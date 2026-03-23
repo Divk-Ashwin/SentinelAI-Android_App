@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/chat/Header';
 import { ContactListItem } from '@/components/chat/ContactListItem';
 import { EmptyState } from '@/components/chat/EmptyState';
+import { PageTransition } from '@/components/PageTransition';
 import { useChat } from '@/context/ChatContext';
 import { Contact } from '@/lib/mockData';
 import { Search, X } from 'lucide-react';
@@ -28,6 +29,7 @@ export default function NewChat() {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       <Header title="New Chat" showBack />
 
@@ -101,5 +103,6 @@ export default function NewChat() {
         )}
       </main>
     </div>
+    </PageTransition>
   );
 }
