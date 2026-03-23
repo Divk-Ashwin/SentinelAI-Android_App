@@ -206,10 +206,6 @@ export default function ChatView() {
     }, 2000);
   };
 
-  const handleAnalyze = (messageText: string) => {
-    setSelectedMessageText(messageText);
-    setAnalyzeModalOpen(true);
-  };
 
 
   return (
