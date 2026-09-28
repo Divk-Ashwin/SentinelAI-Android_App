@@ -4,7 +4,7 @@ import { SettingsItem } from '@/components/chat/SettingsItem';
 import { useChat } from '@/context/ChatContext';
 import { useTheme } from '@/hooks/use-theme';
 import { useToast } from '@/hooks/use-toast';
-import { Palette, Shield, Bell, Brain, Database, Info, Sun, Moon, Monitor, LogOut } from 'lucide-react';
+import { Palette, Shield, Bell, Brain, Database, Info, Sun, Moon, Monitor, LogOut, CloudUpload, Smartphone } from 'lucide-react';
 import { PageTransition } from '@/components/PageTransition';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -166,19 +166,32 @@ export default function Settings() {
           <h3 className="px-4 py-2 text-sm font-medium text-muted-foreground uppercase tracking-wider">
             Account
           </h3>
-          {user && (
-            <div className="px-4 py-2 text-sm text-muted-foreground">
-              Signed in as {user.phone}
-            </div>
+          <div className="px-4 py-2 text-sm text-muted-foreground flex items-center gap-2">
+            <Smartphone className="w-4 h-4" />
+            My number: {localStorage.getItem('sentinel_my_number') || 'Not set'}
+          </div>
+          {user ? (
+            <>
+              <div className="px-4 py-2 text-sm text-muted-foreground">
+                Online backup is on ({user.phone})
+              </div>
+              <SettingsItem
+                icon={<LogOut className="w-5 h-5" />}
+                label="Turn off online backup"
+                onClick={() => {
+                  logout();
+                  toast({ title: "Backup turned off", description: "Your data now stays only on this phone." });
+                }}
+              />
+            </>
+          ) : (
+            <SettingsItem
+              icon={<CloudUpload className="w-5 h-5" />}
+              label="Turn on online backup"
+              showChevron
+              onClick={() => navigate('/backup')}
+            />
           )}
-          <SettingsItem
-            icon={<LogOut className="w-5 h-5" />}
-            label="Logout"
-            onClick={() => {
-              logout();
-              toast({ title: "Logged out", description: "You have been signed out." });
-            }}
-          />
         </div>
       </main>
     </div>

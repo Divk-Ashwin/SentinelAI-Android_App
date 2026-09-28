@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Shield, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,9 @@ import { cn } from '@/lib/utils';
 type Step = 'phone' | 'otp';
 
 export default function Login() {
-  const { sendOTP, verifyOTP } = useAuth();
+  const { sendOTP, verifyOTP, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  useEffect(() => { if (isAuthenticated) navigate('/settings', { replace: true }); }, [isAuthenticated, navigate]);
   const [step, setStep] = useState<Step>('phone');
   const [phone, setPhone] = useState('+91 ');
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));

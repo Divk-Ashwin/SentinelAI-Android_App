@@ -80,9 +80,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     supabase.auth.signOut();
     setUser(null);
-    setHasCompletedSetup(false);
-    localStorage.removeItem(SETUP_STORAGE_KEY);
-    localStorage.removeItem(LANGUAGE_STORAGE_KEY);
   };
 
   return (
