@@ -64,7 +64,16 @@ Deno.serve(async (req) => {
       if (!r.ok) {
         const t = await r.text();
         console.error(`Twilio send failed [${r.status}]: ${t}`);
-        return json({ error: 'Could not send the code. Please check the number and try again.', details: t }, 502);
+        let code = 0;
+        try { code = JSON.parse(t).code; } catch { /* ignore */ }
+        // Return 200 with a friendly error so the app shows it inline instead of treating it as a crash.
+        const message =
+          code === 60628 || code === 20003 ? 'SMS service is temporarily unavailable. Please try again later.'
+          : code === 60200 || code === 21211 ? 'That phone number is not valid.'
+          : code === 60410 || code === 60203 ? 'Too many attempts for this number. Try again later.'
+          : code === 21608 ? 'This number can’t receive codes yet. Please contact support.'
+          : 'Could not send the code. Please try again.';
+        return json({ success: false, error: message, provider_code: code });
       }
       return json({ success: true });
     }
