@@ -44,17 +44,17 @@ export default function SenderDetails() {
       title: "Contact blocked",
       description: "You will no longer receive messages from this contact.",
     });
-    navigate('/');
+    navigate('/', { replace: true });
   };
 
   const handleSearchInConversation = () => {
-    navigate(`/chat/${chat.id}?openSearch=true`);
+    navigate(`/chat/${chat.id}?openSearch=true`, { replace: true });
   };
 
   return (
     <PageTransition>
     <div className="h-full overflow-y-auto scrollbar-thin bg-background">
-      <Header title="Contact Details" showBack onBack={() => navigate(`/chat/${chatId}`)} />
+      <Header title="Contact Details" showBack onBack={() => navigate(`/chat/${chatId}`, { replace: true })} />
 
       <main className="px-4 py-8">
         {/* Profile Section */}

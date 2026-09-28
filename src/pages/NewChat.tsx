@@ -25,7 +25,7 @@ export default function NewChat() {
 
   const handleContactSelect = (contact: Contact) => {
     const chatId = createNewChat(contact);
-    navigate(`/chat/${chatId}`);
+    navigate(`/chat/${chatId}`, { replace: true });
   };
 
   return (

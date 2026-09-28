@@ -37,6 +37,7 @@ export default function ChatView() {
   const { chatId } = useParams<{ chatId: string }>();
   const [searchParams] = useSearchParams();
   const highlightMessageId = searchParams.get('highlight');
+  const openSearchParam = searchParams.get('openSearch') === 'true';
   const navigate = useNavigate();
   const { getChatById, sendMessage, deleteChat, archiveChat, starMessage, deleteMessage, markAsRead, blockContact, starConversation, isConversationStarred } = useChat();
   const { toast } = useToast();
@@ -79,6 +80,10 @@ export default function ChatView() {
     return () => { clearTimeout(a); clearTimeout(b); };
     // Only re-run when the requested message changes, not on every new message.
   }, [highlightMessageId]);
+
+  useEffect(() => {
+    if (openSearchParam) setSearchModalOpen(true);
+  }, [openSearchParam]);
 
   // Find first unread message index
   // Capture the unread position once per chat, BEFORE marking as read,

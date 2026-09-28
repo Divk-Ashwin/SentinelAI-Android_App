@@ -166,7 +166,7 @@ export const VirtualMessageList = forwardRef<VirtualMessageListHandle, VirtualMe
     if (!shouldVirtualize) {
       // For smaller conversations, render normally (no virtualization overhead)
       return (
-        <div ref={parentRef} className="flex-1 overflow-y-auto scrollbar-thin">
+        <div ref={parentRef} className="flex-1 min-h-0 overflow-y-auto scrollbar-thin">
           <div className="px-4 py-4">
             {flatItems.map(item => (
               <div key={item.key}>{renderItem(item)}</div>
@@ -178,7 +178,7 @@ export const VirtualMessageList = forwardRef<VirtualMessageListHandle, VirtualMe
 
     // Virtualized rendering for large conversations
     return (
-      <div ref={parentRef} className="flex-1 overflow-y-auto scrollbar-thin">
+      <div ref={parentRef} className="flex-1 min-h-0 overflow-y-auto scrollbar-thin">
         <div
           className="px-4 py-4 relative"
           style={{ height: `${virtualizer.getTotalSize()}px` }}
