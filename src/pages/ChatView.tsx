@@ -37,8 +37,9 @@ export default function ChatView() {
   const { chatId } = useParams<{ chatId: string }>();
   const [searchParams] = useSearchParams();
   const highlightMessageId = searchParams.get('highlight');
+  const openSearchParam = searchParams.get('openSearch') === 'true';
   const navigate = useNavigate();
-  const { getChatById, sendMessage, deleteChat, archiveChat, starMessage, deleteMessage, markAsRead, blockContact } = useChat();
+  const { getChatById, sendMessage, deleteChat, archiveChat, starMessage, deleteMessage, markAsRead, blockContact, starConversation, isConversationStarred } = useChat();
   const { toast } = useToast();
   
   const [inputValue, setInputValue] = useState('');
@@ -64,26 +65,34 @@ export default function ChatView() {
   const chat = getChatById(chatId || '');
 
   useEffect(() => {
-    if (chatId) {
-      markAsRead(chatId);
-    }
+    if (!chatId) return;
+    // Let the first paint show the unread divider, then mark read.
+    const t = setTimeout(() => markAsRead(chatId), 300);
+    return () => clearTimeout(t);
   }, [chatId, markAsRead]);
 
   // Handle highlight from URL param
   useEffect(() => {
-    if (highlightMessageId && chat?.messages) {
-      setHighlightedMessageId(highlightMessageId);
-      setTimeout(() => {
-        virtualListRef.current?.scrollToMessage(highlightMessageId);
-      }, 100);
-      setTimeout(() => {
-        setHighlightedMessageId(null);
-      }, 2000);
-    }
-  }, [highlightMessageId, chat?.messages]);
+    if (!highlightMessageId) return;
+    setHighlightedMessageId(highlightMessageId);
+    const a = setTimeout(() => virtualListRef.current?.scrollToMessage(highlightMessageId), 100);
+    const b = setTimeout(() => setHighlightedMessageId(null), 2000);
+    return () => { clearTimeout(a); clearTimeout(b); };
+    // Only re-run when the requested message changes, not on every new message.
+  }, [highlightMessageId]);
+
+  useEffect(() => {
+    if (openSearchParam) setSearchModalOpen(true);
+  }, [openSearchParam]);
 
   // Find first unread message index
-  const firstUnreadIndex = chat?.messages.findIndex(m => !m.isRead && m.sender === 'contact') ?? -1;
+  // Capture the unread position once per chat, BEFORE marking as read,
+  // otherwise the divider vanishes on the first render.
+  const unreadSnapshot = useRef<{ chatId?: string; index: number }>({ index: -1 });
+  if (chat && unreadSnapshot.current.chatId !== chat.id) {
+    unreadSnapshot.current = { chatId: chat.id, index: chat.messages.findIndex(m => !m.isRead && m.sender === 'contact') };
+  }
+  const firstUnreadIndex = unreadSnapshot.current.index;
 
   // Auto-scroll when new message is sent
   useEffect(() => {
@@ -98,8 +107,11 @@ export default function ChatView() {
 
   if (!chat) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Conversation not found</p>
+      <div className="h-full bg-background flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <p className="text-muted-foreground">Conversation not found</p>
+          <button onClick={() => navigate('/', { replace: true })} className="text-sm font-medium text-primary">Back to messages</button>
+        </div>
       </div>
     );
   }
@@ -165,7 +177,7 @@ export default function ChatView() {
       title: "Conversation deleted",
       description: "The conversation has been permanently removed.",
     });
-    navigate('/');
+    navigate('/', { replace: true });
   };
 
   const handleArchive = () => {
@@ -174,7 +186,7 @@ export default function ChatView() {
       title: "Conversation archived",
       description: "You can find it in your archived messages.",
     });
-    navigate('/');
+    navigate('/', { replace: true });
   };
 
   const handleBlock = () => {
@@ -183,7 +195,7 @@ export default function ChatView() {
       title: "Contact blocked",
       description: "You will no longer receive messages from this contact.",
     });
-    navigate('/');
+    navigate('/', { replace: true });
   };
 
   const handleNavigateToMessage = (messageId: string) => {
@@ -203,7 +215,7 @@ export default function ChatView() {
 
   return (
     <PageTransition>
-    <div className="h-screen bg-background flex flex-col">
+    <div className="h-full bg-background flex flex-col">
       <Header
         title={displayName}
         showBack
@@ -212,7 +224,7 @@ export default function ChatView() {
         rightContent={
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
             <DropdownMenuTrigger asChild>
-              <button className="p-2 rounded-full hover:bg-muted transition-colors">
+              <button aria-label="More options" className="p-2 rounded-full hover:bg-muted transition-colors">
                 <MoreVertical className="w-5 h-5 text-foreground" />
               </button>
             </DropdownMenuTrigger>
@@ -225,9 +237,9 @@ export default function ChatView() {
                 <Info className="w-4 h-4" />
                 Details
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { toast({ title: "Conversation starred", description: "You can find starred conversations easily." }); setMenuOpen(false); }} className="gap-3">
+              <DropdownMenuItem onClick={() => { const was = isConversationStarred(chat.id); starConversation(chat.id); toast({ title: was ? "Conversation unstarred" : "Conversation starred", duration: 1000 }); setMenuOpen(false); }} className="gap-3">
                 <Star className="w-4 h-4" />
-                Star conversation
+                {isConversationStarred(chat.id) ? 'Unstar conversation' : 'Star conversation'}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => { setSearchModalOpen(true); setMenuOpen(false); }} className="gap-3">
                 <Search className="w-4 h-4" />
@@ -282,7 +294,7 @@ export default function ChatView() {
       <div className="sticky bottom-0 bg-card border-t border-border p-3">
         <div className="flex items-center gap-2">
           <AttachmentMenu onSelect={handleAttachmentSelect}>
-            <button className="p-2.5 rounded-full hover:bg-muted transition-colors text-muted-foreground">
+            <button aria-label="Attach" className="p-2.5 rounded-full hover:bg-muted transition-colors text-muted-foreground">
               <Paperclip className="w-5 h-5" />
             </button>
           </AttachmentMenu>
@@ -299,6 +311,7 @@ export default function ChatView() {
           
           <button
             onClick={handleSend}
+            aria-label="Send message"
             disabled={!inputValue.trim()}
             className={cn(
               'p-2.5 rounded-full transition-all',

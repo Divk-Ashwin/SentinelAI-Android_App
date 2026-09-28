@@ -55,7 +55,7 @@ export default function BlockedContacts() {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background">
+    <div className="h-full overflow-y-auto scrollbar-thin bg-background">
       <Header
         title="Blocked Contacts"
         subtitle={blockedContacts.length > 0 ? `${blockedContacts.length} blocked` : undefined}

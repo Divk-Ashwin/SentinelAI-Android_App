@@ -25,12 +25,12 @@ export default function NewChat() {
 
   const handleContactSelect = (contact: Contact) => {
     const chatId = createNewChat(contact);
-    navigate(`/chat/${chatId}`);
+    navigate(`/chat/${chatId}`, { replace: true });
   };
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background">
+    <div className="h-full overflow-y-auto scrollbar-thin bg-background">
       <Header title="New Chat" showBack />
 
       {/* Search Bar */}

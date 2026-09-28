@@ -27,22 +27,23 @@ function ProtectedRoutes() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex-1 bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!isAuthenticated) {
-    return <Login />;
+    return <div className="flex-1 overflow-y-auto"><Login /></div>;
   }
 
   if (!hasCompletedSetup) {
-    return <Welcome />;
+    return <div className="flex-1 overflow-y-auto"><Welcome /></div>;
   }
 
   return (
     <>
+      <div className="flex-1 min-h-0 flex flex-col">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/chat/:chatId" element={<ChatView />} />
@@ -55,6 +56,7 @@ function ProtectedRoutes() {
         <Route path="/starred" element={<StarredMessages />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </div>
       <BottomNav />
     </>
   );
@@ -69,8 +71,8 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <div className="max-w-md mx-auto min-h-screen bg-background shadow-xl relative flex flex-col">
-                <div className="flex-1 flex flex-col">
+              <div className="max-w-md mx-auto h-[100dvh] overflow-hidden bg-background shadow-xl relative flex flex-col">
+                <div className="flex-1 min-h-0 flex flex-col">
                   <ProtectedRoutes />
                 </div>
               </div>

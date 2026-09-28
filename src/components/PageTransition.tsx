@@ -21,7 +21,7 @@ export function PageTransition({ children, className }: PageTransitionProps) {
   return (
     <div
       className={cn(
-        'flex-1 flex flex-col min-h-0',
+        'flex-1 flex flex-col min-h-0 h-full',
         mounted ? 'animate-page-slide-in' : 'opacity-0 translate-x-4',
         className
       )}

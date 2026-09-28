@@ -14,6 +14,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { MoreVertical, CheckCheck, Trash2, Settings, Archive, ShieldOff, Star } from 'lucide-react';
 
 export default function Home() {
@@ -22,6 +26,7 @@ export default function Home() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
 
   const filteredChats = chats.filter(chat => {
     const searchLower = searchQuery.toLowerCase();
@@ -59,20 +64,20 @@ export default function Home() {
   }, [toast]);
 
   return (
-    <div className="h-screen bg-background relative flex flex-col">
+    <div className="h-full bg-background relative flex flex-col">
       <Header
         title="SentinelAI"
         showSearch
         onSearchChange={setSearchQuery}
         leftContent={
-          <button className="p-2">
+          <button className="p-2" aria-label="Settings" onClick={() => navigate('/settings')}>
             <Avatar name="You" size="sm" />
           </button>
         }
         rightContent={
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
             <DropdownMenuTrigger asChild>
-              <button className="p-2 rounded-full hover:bg-muted transition-colors">
+              <button aria-label="More options" className="p-2 rounded-full hover:bg-muted transition-colors">
                 <MoreVertical className="w-5 h-5 text-foreground" />
               </button>
             </DropdownMenuTrigger>
@@ -97,7 +102,7 @@ export default function Home() {
                 <Settings className="w-4 h-4" />
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleDeleteAll} className="gap-3 text-destructive focus:text-destructive">
+              <DropdownMenuItem disabled={chats.length === 0} onClick={() => { setMenuOpen(false); setConfirmDeleteAll(true); }} className="gap-3 text-destructive focus:text-destructive">
                 <Trash2 className="w-4 h-4" />
                 Delete all conversations
               </DropdownMenuItem>
@@ -108,7 +113,7 @@ export default function Home() {
 
       <PullToRefresh 
         onRefresh={handleRefresh}
-        className="flex-1 pb-20 scrollbar-thin"
+        className="flex-1 min-h-0 pb-24 scrollbar-thin"
       >
         {searchQuery && filteredChats.length === 0 ? (
           <EmptyState type="search" />
@@ -124,6 +129,19 @@ export default function Home() {
       </PullToRefresh>
 
       <FloatingActionButton />
+
+      <AlertDialog open={confirmDeleteAll} onOpenChange={setConfirmDeleteAll}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete all conversations?</AlertDialogTitle>
+            <AlertDialogDescription>This removes every conversation in your inbox and cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete all</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
