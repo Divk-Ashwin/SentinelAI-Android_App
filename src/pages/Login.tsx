@@ -111,8 +111,9 @@ export default function Login() {
   const handleResend = async () => {
     if (resendTimer > 0) return;
     setLoading(true);
-    await sendOTP(phone);
+    const r = await sendOTP(phone);
     setLoading(false);
+    if (!r.success) { setError(r.error || 'Failed to resend'); return; }
     setResendTimer(30);
     setOtp(Array(6).fill(''));
     otpRefs.current[0]?.focus();
@@ -246,9 +247,6 @@ export default function Login() {
             ← Change phone number
           </button>
 
-          <p className="text-xs text-muted-foreground text-center">
-            Use code <span className="font-mono font-bold text-foreground">123456</span> for demo
-          </p>
         </div>
       )}
     </div>
