@@ -17,7 +17,7 @@ export function BottomNav() {
   if (!showOn.includes(location.pathname)) return null;
 
   return (
-    <nav className="sticky bottom-0 z-40 bg-card border-t border-border flex items-center justify-around h-14">
+    <nav className="shrink-0 z-40 bg-card border-t border-border flex items-center justify-around h-14 pb-[env(safe-area-inset-bottom)]">
       {navItems.map(({ path, icon: Icon, label }) => {
         const active = location.pathname === path;
         return (
