@@ -55,8 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const sendOTP = async (phone: string) => {
     const cleaned = phone.replace(/\s/g, '');
     if (!/^\+91\d{10}$/.test(cleaned)) return { success: false, error: 'Enter a valid number: +91 XXXXX XXXXX' };
-    const { error } = await supabase.functions.invoke('phone-otp', { body: { action: 'send', phone: cleaned } });
+    const { data, error } = await supabase.functions.invoke('phone-otp', { body: { action: 'send', phone: cleaned } });
     if (error) return { success: false, error: await readError(error) };
+    if (!data?.success) return { success: false, error: data?.error ?? 'Could not send the code.' };
     return { success: true };
   };
 
