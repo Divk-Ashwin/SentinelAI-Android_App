@@ -1,3 +1,4 @@
+import { reportScam } from '@/hooks/use-cloud-sync';
 import { useNavigate } from 'react-router-dom';
 import { Avatar } from './Avatar';
 import { Chat } from '@/lib/mockData';
@@ -90,6 +91,8 @@ export function ChatListItem({ chat }: ChatListItemProps) {
   };
 
   const handleBlock = () => {
+    const lastIncoming = [...chat.messages].reverse().find(m => m.sender === 'contact');
+    reportScam(chat.contactPhone, lastIncoming?.text ?? '');
     blockContact(chat.id);
     toast({ title: "Contact blocked", description: "You will no longer receive messages from this contact." });
     setBlockDialogOpen(false);
