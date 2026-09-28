@@ -19,11 +19,13 @@ import StarredMessages from "./pages/StarredMessages";
 import Login from "./pages/Login";
 import Welcome from "./pages/Welcome";
 import NotFound from "./pages/NotFound";
+import { useCloudSync } from "@/hooks/use-cloud-sync";
 
 const queryClient = new QueryClient();
 
 function ProtectedRoutes() {
   const { isAuthenticated, isLoading, hasCompletedSetup } = useAuth();
+  useCloudSync();
 
   if (isLoading) {
     return (

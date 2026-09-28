@@ -12,6 +12,7 @@ import { LocationPickerModal } from '@/components/chat/LocationPickerModal';
 import { PageTransition } from '@/components/PageTransition';
 import { useChat } from '@/context/ChatContext';
 import { useToast } from '@/hooks/use-toast';
+import { reportScam } from '@/hooks/use-cloud-sync';
 import { Send, Paperclip, AlertTriangle, X, Star, Search, Archive, Trash2, ShieldOff, UserPlus, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MessageAttachment, Contact } from '@/lib/mockData';
@@ -190,6 +191,8 @@ export default function ChatView() {
   };
 
   const handleBlock = () => {
+    const lastIncoming = [...chat.messages].reverse().find(m => m.sender === 'contact');
+    reportScam(chat.contactPhone, lastIncoming?.text ?? '');
     blockContact(chat.id);
     toast({
       title: "Contact blocked",
