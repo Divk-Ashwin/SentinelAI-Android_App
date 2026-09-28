@@ -59,7 +59,7 @@ export default function Home() {
   }, [toast]);
 
   return (
-    <div className="h-screen bg-background relative flex flex-col">
+    <div className="h-full bg-background relative flex flex-col">
       <Header
         title="SentinelAI"
         showSearch

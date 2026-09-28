@@ -42,7 +42,7 @@ export default function Settings() {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background">
+    <div className="h-full overflow-y-auto scrollbar-thin bg-background">
       <Header title="Settings" showBack />
 
       <main className="py-4">

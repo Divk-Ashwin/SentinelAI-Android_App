@@ -64,7 +64,7 @@ export default function StarredMessages() {
 
   return (
     <PageTransition>
-    <div className="h-screen bg-background flex flex-col">
+    <div className="h-full bg-background flex flex-col">
       <Header
         title="Starred"
         subtitle={totalStarred > 0 ? `${totalStarred} starred` : undefined}

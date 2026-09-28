@@ -29,7 +29,7 @@ export default function SenderDetails() {
 
   if (!chat) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="h-full bg-background flex items-center justify-center">
         <p className="text-muted-foreground">Contact not found</p>
       </div>
     );
@@ -53,7 +53,7 @@ export default function SenderDetails() {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background">
+    <div className="h-full overflow-y-auto scrollbar-thin bg-background">
       <Header title="Contact Details" showBack onBack={() => navigate(`/chat/${chatId}`)} />
 
       <main className="px-4 py-8">

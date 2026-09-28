@@ -15,7 +15,7 @@ export default function About() {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background">
+    <div className="h-full overflow-y-auto scrollbar-thin bg-background">
       <Header title="About" showBack />
 
       <main className="px-6 py-8">

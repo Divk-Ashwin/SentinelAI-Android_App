@@ -30,7 +30,7 @@ export default function NewChat() {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background">
+    <div className="h-full overflow-y-auto scrollbar-thin bg-background">
       <Header title="New Chat" showBack />
 
       {/* Search Bar */}

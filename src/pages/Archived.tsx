@@ -37,7 +37,7 @@ export default function Archived() {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background">
+    <div className="h-full overflow-y-auto scrollbar-thin bg-background">
       <Header
         title="Archived"
         subtitle={archived.length > 0 ? `${archived.length} conversation${archived.length !== 1 ? 's' : ''}` : undefined}
