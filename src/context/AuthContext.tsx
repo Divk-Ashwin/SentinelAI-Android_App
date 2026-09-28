@@ -1,8 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import type { User } from '@supabase/supabase-js';
+import { FunctionsHttpError } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AuthUser {
+  id: string;
   phone: string;
-  authenticatedAt: string;
 }
 
 interface AuthContextType {
@@ -17,65 +20,52 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const AUTH_STORAGE_KEY = 'sentinel_auth_user';
 const SETUP_STORAGE_KEY = 'sentinel_setup_complete';
 const LANGUAGE_STORAGE_KEY = 'sentinel_language';
 
-// Mock OTP code for development
-const MOCK_OTP = '123456';
+const toAuthUser = (u: User | null | undefined): AuthUser | null =>
+  u ? { id: u.id, phone: (u.user_metadata?.phone as string) ?? '' } : null;
+
+async function readError(error: unknown): Promise<string> {
+  if (error instanceof FunctionsHttpError) {
+    try {
+      const body = await error.context.json();
+      return body?.error ?? 'Request failed';
+    } catch { /* fall through */ }
+  }
+  return 'Network error. Check your connection and try again.';
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasCompletedSetup, setHasCompletedSetup] = useState(false);
+  const [hasCompletedSetup, setHasCompletedSetup] = useState(localStorage.getItem(SETUP_STORAGE_KEY) === 'true');
 
-  // Restore session from localStorage
   useEffect(() => {
-    const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-    const setupDone = localStorage.getItem(SETUP_STORAGE_KEY);
-    if (stored) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-      }
-    }
-    setHasCompletedSetup(setupDone === 'true');
-    setIsLoading(false);
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(toAuthUser(session?.user));
+    });
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(toAuthUser(data.user));
+      setIsLoading(false);
+    });
+    return () => sub.subscription.unsubscribe();
   }, []);
 
-  const sendOTP = async (phone: string): Promise<{ success: boolean; error?: string }> => {
-    // Validate phone format (Indian: +91 followed by 10 digits)
+  const sendOTP = async (phone: string) => {
     const cleaned = phone.replace(/\s/g, '');
-    if (!/^\+91\d{10}$/.test(cleaned)) {
-      return { success: false, error: 'Invalid phone number format. Use +91 XXXXX XXXXX' };
-    }
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    // In production, this would call Supabase auth.signInWithOtp
-    // For now, mock success
+    if (!/^\+91\d{10}$/.test(cleaned)) return { success: false, error: 'Enter a valid number: +91 XXXXX XXXXX' };
+    const { error } = await supabase.functions.invoke('phone-otp', { body: { action: 'send', phone: cleaned } });
+    if (error) return { success: false, error: await readError(error) };
     return { success: true };
   };
 
-  const verifyOTP = async (phone: string, otp: string): Promise<{ success: boolean; error?: string }> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Mock verification — accept '123456' as valid OTP
-    if (otp !== MOCK_OTP) {
-      return { success: false, error: 'Invalid verification code. Try 123456.' };
-    }
-
-    const authUser: AuthUser = {
-      phone: phone.replace(/\s/g, ''),
-      authenticatedAt: new Date().toISOString(),
-    };
-
-    setUser(authUser);
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authUser));
+  const verifyOTP = async (phone: string, otp: string) => {
+    const cleaned = phone.replace(/\s/g, '');
+    const { data, error } = await supabase.functions.invoke('phone-otp', { body: { action: 'verify', phone: cleaned, code: otp } });
+    if (error) return { success: false, error: await readError(error) };
+    const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' });
+    if (vErr) return { success: false, error: 'Could not sign you in. Please try again.' };
     return { success: true };
   };
 
@@ -83,29 +73,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(SETUP_STORAGE_KEY, 'true');
     localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
     setHasCompletedSetup(true);
+    if (user) supabase.from('profiles').update({ language }).eq('id', user.id).then(() => {});
   };
 
   const logout = () => {
+    supabase.auth.signOut();
     setUser(null);
     setHasCompletedSetup(false);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
     localStorage.removeItem(SETUP_STORAGE_KEY);
     localStorage.removeItem(LANGUAGE_STORAGE_KEY);
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated: !!user,
-        isLoading,
-        hasCompletedSetup,
-        sendOTP,
-        verifyOTP,
-        completeSetup,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, hasCompletedSetup, sendOTP, verifyOTP, completeSetup, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -113,8 +93,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 }
