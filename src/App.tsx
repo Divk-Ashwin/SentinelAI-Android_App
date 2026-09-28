@@ -24,7 +24,7 @@ import { useCloudSync } from "@/hooks/use-cloud-sync";
 const queryClient = new QueryClient();
 
 function ProtectedRoutes() {
-  const { isAuthenticated, isLoading, hasCompletedSetup } = useAuth();
+  const { isLoading, hasCompletedSetup } = useAuth();
   useCloudSync();
 
   if (isLoading) {
@@ -33,10 +33,6 @@ function ProtectedRoutes() {
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    return <div className="flex-1 overflow-y-auto"><Login /></div>;
   }
 
   if (!hasCompletedSetup) {
@@ -56,6 +52,7 @@ function ProtectedRoutes() {
         <Route path="/about" element={<About />} />
         <Route path="/blocked" element={<BlockedContacts />} />
         <Route path="/starred" element={<StarredMessages />} />
+        <Route path="/backup" element={<div className="h-full overflow-y-auto"><Login /></div>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       </div>

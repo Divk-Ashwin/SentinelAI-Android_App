@@ -4,7 +4,7 @@ import { Shield, MessageSquare, Zap, Globe, ArrowRight, Check } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-type WelcomeStep = 'welcome' | 'permissions' | 'language';
+type WelcomeStep = 'welcome' | 'number' | 'permissions' | 'language';
 
 const languages = [
   { code: 'en', label: 'English', native: 'English' },
@@ -17,6 +17,7 @@ export default function Welcome() {
   const [step, setStep] = useState<WelcomeStep>('welcome');
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [permissionsGranted, setPermissionsGranted] = useState(false);
+  const [myNumber, setMyNumber] = useState(localStorage.getItem('sentinel_my_number') ?? '+91 ');
 
   const handleGrantPermissions = () => {
     // In Capacitor, this would trigger native permission requests
@@ -71,9 +72,41 @@ export default function Welcome() {
           </div>
         </div>
 
-        <Button onClick={() => setStep('permissions')} className="w-full max-w-xs h-12 text-base rounded-xl gap-2">
+        <Button onClick={() => setStep('number')} className="w-full max-w-xs h-12 text-base rounded-xl gap-2">
           Get Started <ArrowRight className="w-5 h-5" />
         </Button>
+      </div>
+    );
+  }
+
+  if (step === 'number') {
+    const valid = /^\+91\d{10}$/.test(myNumber.replace(/\s/g, ''));
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
+        <h2 className="text-xl font-bold text-foreground mb-2">Your phone number</h2>
+        <p className="text-muted-foreground text-center mb-6 text-sm max-w-xs">
+          On the installed Android app this is picked up from your SIM with one tap. No code needed.
+        </p>
+        <input
+          type="tel"
+          inputMode="tel"
+          value={myNumber}
+          onChange={(e) => setMyNumber(e.target.value)}
+          className="w-full max-w-xs h-12 px-4 rounded-xl bg-card border border-border text-foreground text-base mb-6 focus:outline-none focus:ring-2 focus:ring-ring"
+          aria-label="Your phone number"
+        />
+        <div className="w-full max-w-xs space-y-3">
+          <Button
+            disabled={!valid}
+            onClick={() => { localStorage.setItem('sentinel_my_number', myNumber.replace(/\s/g, '')); setStep('permissions'); }}
+            className="w-full h-12 text-base rounded-xl gap-2"
+          >
+            Continue <ArrowRight className="w-5 h-5" />
+          </Button>
+          <button onClick={() => setStep('permissions')} className="w-full text-sm text-muted-foreground hover:text-foreground text-center py-2">
+            Skip for now
+          </button>
+        </div>
       </div>
     );
   }
