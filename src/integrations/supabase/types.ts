@@ -14,7 +14,129 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      blocked_numbers: {
+        Row: {
+          blocked_at: string
+          id: string
+          name: string
+          phone: string
+          user_id: string
+        }
+        Insert: {
+          blocked_at?: string
+          id?: string
+          name?: string
+          phone: string
+          user_id?: string
+        }
+        Update: {
+          blocked_at?: string
+          id?: string
+          name?: string
+          phone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      otp_attempts: {
+        Row: {
+          created_at: string
+          id: string
+          phone: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          phone: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          phone?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          language: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+          language?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          language?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      scam_reports: {
+        Row: {
+          created_at: string
+          id: string
+          message_text: string
+          risk_level: string
+          sender: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_text?: string
+          risk_level?: string
+          sender: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_text?: string
+          risk_level?: string
+          sender?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      starred_items: {
+        Row: {
+          chat_id: string
+          created_at: string
+          id: string
+          kind: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          chat_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          message_id?: string
+          user_id?: string
+        }
+        Update: {
+          chat_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
